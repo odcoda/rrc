@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roll Call Robot</title>
+  <link rel="stylesheet" href="../assets/rrc.css">
+</head>
+<body>
+  <div data-rrc-auth></div>
+
+  <main class="rrc-shell">
+    <a class="rrc-backlink" href="../index.html">Back to roster</a>
+
+    <section class="rrc-hero" style="margin-top: 16px;">
+      <h1>Roll Call Robot</h1>
+      <p>Give me a list of names and a vibe. I will turn it into a playful roll call.</p>
+    </section>
+
+    <section class="rrc-panel">
+      <h2>Inputs</h2>
+      <form data-rrc-form>
+        <div class="rrc-field">
+          <label for="names">Names or characters</label>
+          <textarea id="names" name="names" placeholder="Ariadne\nBaker\nCallisto"></textarea>
+        </div>
+        <div class="rrc-field">
+          <label for="vibe">Vibe</label>
+          <select id="vibe" name="vibe">
+            <option value="pep rally">Pep rally</option>
+            <option value="quiet roll call">Quiet roll call</option>
+            <option value="space station">Space station</option>
+            <option value="mystic choir">Mystic choir</option>
+            <option value="neon arcade">Neon arcade</option>
+          </select>
+        </div>
+        <button class="rrc-button" type="submit" data-rrc-submit>Call the roll</button>
+        <p class="rrc-note" data-rrc-auth-note></p>
+      </form>
+    </section>
+
+    <section class="rrc-panel">
+      <h2>Roll call output</h2>
+      <div class="rrc-output" data-rrc-output></div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initRobotShell } from '../shared/rrc-shell.js'
+    import { createChatCompletion, extractChatMessage } from '../shared/rrc-openrouter.js'
+    import { getAuthState, onAuthChange } from '../shared/rrc-auth.js'
+
+    initRobotShell()
+
+    const form = document.querySelector('[data-rrc-form]')
+    const submitButton = document.querySelector('[data-rrc-submit]')
+    const output = document.querySelector('[data-rrc-output]')
+    const authNote = document.querySelector('[data-rrc-auth-note]')
+    const namesField = document.querySelector('#names')
+    const vibeField = document.querySelector('#vibe')
+
+    const systemPrompt = `You are the Roll Call Robot.\n- Keep the response under 120 words.\n- Use short call-and-response lines.\n- Avoid emojis.\n- End with a brief closing line.`
+
+    const updateAuthNote = (state) => {
+      if (state.status === 'authorized') {
+        submitButton.disabled = false
+        authNote.textContent = 'OpenRouter connected. Ready to roll.'
+      } else if (state.status === 'authorizing') {
+        submitButton.disabled = true
+        authNote.textContent = 'Connecting to OpenRouter...'
+      } else if (state.status === 'error') {
+        submitButton.disabled = true
+        authNote.textContent = 'OpenRouter auth error. Use the top bar to reconnect.'
+      } else {
+        submitButton.disabled = true
+        authNote.textContent = 'Connect OpenRouter in the top bar to run this robot.'
+      }
+    }
+
+    updateAuthNote(getAuthState())
+    onAuthChange(updateAuthNote)
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault()
+
+      const names = namesField.value.trim()
+      if (!names) {
+        output.textContent = 'Add at least one name before calling the roll.'
+        return
+      }
+
+      output.textContent = 'Summoning roll call'
+      output.classList.add('is-loading')
+      submitButton.disabled = true
+
+      try {
+        const response = await createChatCompletion({
+          model: 'openrouter/auto',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            {
+              role: 'user',
+              content: `Vibe: ${vibeField.value}\nNames:\n${names}`,
+            },
+          ],
+          max_output_tokens: 180,
+          temperature: 0.9,
+        })
+
+        const message = extractChatMessage(response)
+        output.textContent = message || 'No response returned.'
+      } catch (error) {
+        output.textContent = error instanceof Error ? error.message : 'Unexpected error.'
+      } finally {
+        output.classList.remove('is-loading')
+        updateAuthNote(getAuthState())
+      }
+    })
+  </script>
+</body>
+</html>

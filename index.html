@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Robot Roll Call</title>
+  <link rel="stylesheet" href="assets/rrc.css">
+</head>
+<body>
+  <div data-rrc-auth></div>
+
+  <main class="rrc-shell">
+    <section class="rrc-hero">
+      <h1>Robot Roll Call</h1>
+      <p>Each robot is a tiny, playful tool powered by the same OpenRouter login. Sign in once up top, then hop between bots.</p>
+      <p class="rrc-note">Want to add a new robot? Copy <span class="rrc-mono">robots/template.html</span> and drop it into the roster.</p>
+    </section>
+
+    <section class="rrc-grid">
+      <article class="rrc-card">
+        <span class="rrc-chip">Live robot</span>
+        <h2>Roll Call Robot</h2>
+        <p>Turn a list of names into a chant-like roll call with a chosen vibe.</p>
+        <a class="rrc-link" href="robots/roll-call.html">Launch roll call</a>
+      </article>
+
+      <article class="rrc-card">
+        <span class="rrc-chip">Test robot</span>
+        <h2>Battery Forecast Robot</h2>
+        <p>Drop in a situation and get a three-line battery forecast.</p>
+        <a class="rrc-link" href="robots/battery-forecast.html">Check battery</a>
+      </article>
+
+      <article class="rrc-card">
+        <span class="rrc-chip">Template</span>
+        <h2>Blank Robot Shell</h2>
+        <p>A clean starter page wired to the shared auth bar and OpenRouter helper.</p>
+        <a class="rrc-link" href="robots/template.html">Open template</a>
+      </article>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initRobotShell } from './shared/rrc-shell.js'
+
+    initRobotShell()
+  </script>
+</body>
+</html>

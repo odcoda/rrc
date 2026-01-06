@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Robot Template</title>
+  <link rel="stylesheet" href="../assets/rrc.css">
+</head>
+<body>
+  <div data-rrc-auth></div>
+
+  <main class="rrc-shell">
+    <a class="rrc-backlink" href="../index.html">Back to roster</a>
+
+    <section class="rrc-hero" style="margin-top: 16px;">
+      <h1>Robot Template</h1>
+      <p>Duplicate this file, rename it, then wire in your robot logic below.</p>
+    </section>
+
+    <section class="rrc-panel">
+      <h2>Inputs</h2>
+      <form data-rrc-form>
+        <div class="rrc-field">
+          <label for="prompt">Prompt</label>
+          <textarea id="prompt" name="prompt" placeholder="Describe what your robot should do."></textarea>
+        </div>
+        <button class="rrc-button" type="submit" data-rrc-submit>Run robot</button>
+        <p class="rrc-note" data-rrc-auth-note></p>
+      </form>
+    </section>
+
+    <section class="rrc-panel">
+      <h2>Output</h2>
+      <div class="rrc-output" data-rrc-output>Hook up your output here.</div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initRobotShell } from '../shared/rrc-shell.js'
+    import { createChatCompletion, extractChatMessage } from '../shared/rrc-openrouter.js'
+    import { getAuthState, onAuthChange } from '../shared/rrc-auth.js'
+
+    initRobotShell()
+
+    const form = document.querySelector('[data-rrc-form]')
+    const submitButton = document.querySelector('[data-rrc-submit]')
+    const output = document.querySelector('[data-rrc-output]')
+    const authNote = document.querySelector('[data-rrc-auth-note]')
+    const promptField = document.querySelector('#prompt')
+
+    const updateAuthNote = (state) => {
+      if (state.status === 'authorized') {
+        submitButton.disabled = false
+        authNote.textContent = 'OpenRouter connected. Ready to run.'
+      } else if (state.status === 'authorizing') {
+        submitButton.disabled = true
+        authNote.textContent = 'Connecting to OpenRouter...'
+      } else if (state.status === 'error') {
+        submitButton.disabled = true
+        authNote.textContent = 'OpenRouter auth error. Use the top bar to reconnect.'
+      } else {
+        submitButton.disabled = true
+        authNote.textContent = 'Connect OpenRouter in the top bar to run this robot.'
+      }
+    }
+
+    updateAuthNote(getAuthState())
+    onAuthChange(updateAuthNote)
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault()
+
+      const prompt = promptField.value.trim()
+      if (!prompt) {
+        output.textContent = 'Add a prompt to run the robot.'
+        return
+      }
+
+      output.textContent = 'Thinking'
+      output.classList.add('is-loading')
+      submitButton.disabled = true
+
+      try {
+        const response = await createChatCompletion({
+          model: 'openrouter/auto',
+          messages: [
+            { role: 'system', content: 'You are a helpful robot.' },
+            { role: 'user', content: prompt },
+          ],
+          max_output_tokens: 160,
+          temperature: 0.8,
+        })
+
+        const message = extractChatMessage(response)
+        output.textContent = message || 'No response returned.'
+      } catch (error) {
+        output.textContent = error instanceof Error ? error.message : 'Unexpected error.'
+      } finally {
+        output.classList.remove('is-loading')
+        updateAuthNote(getAuthState())
+      }
+    })
+  </script>
+</body>
+</html>

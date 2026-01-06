@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Battery Forecast Robot</title>
+  <link rel="stylesheet" href="../assets/rrc.css">
+</head>
+<body>
+  <div data-rrc-auth></div>
+
+  <main class="rrc-shell">
+    <a class="rrc-backlink" href="../index.html">Back to roster</a>
+
+    <section class="rrc-hero" style="margin-top: 16px;">
+      <h1>Battery Forecast Robot</h1>
+      <p>Describe a situation and I will issue a playful battery-status forecast.</p>
+    </section>
+
+    <section class="rrc-panel">
+      <h2>Inputs</h2>
+      <form data-rrc-form>
+        <div class="rrc-field">
+          <label for="situation">Situation</label>
+          <textarea id="situation" name="situation" placeholder="I have three meetings and a long train ride ahead."></textarea>
+        </div>
+        <div class="rrc-field">
+          <label for="tone">Tone</label>
+          <select id="tone" name="tone">
+            <option value="gentle">Gentle</option>
+            <option value="deadpan">Deadpan</option>
+            <option value="dramatic">Dramatic</option>
+            <option value="retro sci-fi">Retro sci-fi</option>
+          </select>
+        </div>
+        <button class="rrc-button" type="submit" data-rrc-submit>Check battery</button>
+        <p class="rrc-note" data-rrc-auth-note></p>
+      </form>
+    </section>
+
+    <section class="rrc-panel">
+      <h2>Battery report</h2>
+      <div class="rrc-output" data-rrc-output></div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initRobotShell } from '../shared/rrc-shell.js'
+    import { createChatCompletion, extractChatMessage } from '../shared/rrc-openrouter.js'
+    import { getAuthState, onAuthChange } from '../shared/rrc-auth.js'
+
+    initRobotShell()
+
+    const form = document.querySelector('[data-rrc-form]')
+    const submitButton = document.querySelector('[data-rrc-submit]')
+    const output = document.querySelector('[data-rrc-output]')
+    const authNote = document.querySelector('[data-rrc-auth-note]')
+    const situationField = document.querySelector('#situation')
+    const toneField = document.querySelector('#tone')
+
+    const systemPrompt = `You are the Battery Forecast Robot.\n- Write 3 short lines.\n- Line 1: Battery percent and label (example: "Battery: 62% - Steady").\n- Line 2: A small forecast metaphor tied to the situation.\n- Line 3: A single action suggestion.\n- Keep it under 60 words.\n- No emojis.`
+
+    const updateAuthNote = (state) => {
+      if (state.status === 'authorized') {
+        submitButton.disabled = false
+        authNote.textContent = 'OpenRouter connected. Ready to check battery.'
+      } else if (state.status === 'authorizing') {
+        submitButton.disabled = true
+        authNote.textContent = 'Connecting to OpenRouter...'
+      } else if (state.status === 'error') {
+        submitButton.disabled = true
+        authNote.textContent = 'OpenRouter auth error. Use the top bar to reconnect.'
+      } else {
+        submitButton.disabled = true
+        authNote.textContent = 'Connect OpenRouter in the top bar to run this robot.'
+      }
+    }
+
+    updateAuthNote(getAuthState())
+    onAuthChange(updateAuthNote)
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault()
+
+      const situation = situationField.value.trim()
+      if (!situation) {
+        output.textContent = 'Add a situation before checking the battery.'
+        return
+      }
+
+      output.textContent = 'Running diagnostics'
+      output.classList.add('is-loading')
+      submitButton.disabled = true
+
+      try {
+        const response = await createChatCompletion({
+          model: 'openrouter/auto',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            {
+              role: 'user',
+              content: `Tone: ${toneField.value}\nSituation: ${situation}`,
+            },
+          ],
+          max_output_tokens: 120,
+          temperature: 0.85,
+        })
+
+        const message = extractChatMessage(response)
+        output.textContent = message || 'No response returned.'
+      } catch (error) {
+        output.textContent = error instanceof Error ? error.message : 'Unexpected error.'
+      } finally {
+        output.classList.remove('is-loading')
+        updateAuthNote(getAuthState())
+      }
+    })
+  </script>
+</body>
+</html>
