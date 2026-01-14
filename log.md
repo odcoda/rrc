@@ -1,3 +1,11 @@
+## 2026-01-14 fix empathy game integration
+rewrote empathy-game.html to use shared RRC modules:
+- now uses shared auth (rrc:openrouter:tokens) instead of separate auth
+- uses createChatCompletion/extractChatMessage from rrc-openrouter.js
+- has data-rrc-auth bar via initRobotShell()
+- added back link to roster
+- kept unique purple gradient styling and game mechanics
+
 ## 2026-01-14 unique robot styling
 gave each example robot a distinct visual personality:
 - roll-call: stadium marquee theme with running lights, glowing text, typewriter output

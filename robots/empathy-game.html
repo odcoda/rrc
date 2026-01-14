@@ -1,806 +1,618 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Empathy Game - Help the LLM Feel Better</title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Empathy Game - Robot Roll Call</title>
+  <link rel="stylesheet" href="../assets/rrc.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+      min-height: 100vh;
+    }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
+    .empathy-shell {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 20px;
+    }
 
-        .container {
-            max-width: 700px;
-            margin: 0 auto;
-        }
+    .empathy-back {
+      color: rgba(255,255,255,0.8);
+      text-decoration: none;
+      font-size: 0.9rem;
+      display: inline-block;
+      margin-bottom: 15px;
+    }
+    .empathy-back:hover { color: white; text-decoration: underline; }
 
-        .auth-section {
-            background: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
+    .empathy-card {
+      background: white;
+      border-radius: 16px;
+      padding: 25px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+    }
 
-        .auth-section h2 {
-            color: #333;
-            margin-bottom: 15px;
-        }
+    .empathy-header {
+      text-align: center;
+      margin-bottom: 25px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #f0f0f0;
+    }
 
-        .auth-btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
+    .empathy-header h1 {
+      color: #333;
+      font-size: 1.8rem;
+      margin: 0 0 8px 0;
+      font-weight: 700;
+    }
 
-        .auth-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
+    .empathy-header p {
+      color: #666;
+      font-size: 0.95rem;
+      margin: 0;
+    }
 
-        .auth-status {
-            margin-top: 10px;
-            padding: 10px;
-            border-radius: 6px;
-            font-size: 14px;
-        }
+    .empathy-controls {
+      display: grid;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
 
-        .auth-status.connected {
-            background: #d4edda;
-            color: #155724;
-        }
+    .empathy-field label {
+      display: block;
+      color: #333;
+      font-weight: 600;
+      margin-bottom: 6px;
+      font-size: 0.9rem;
+    }
 
-        .auth-status.disconnected {
-            background: #f8d7da;
-            color: #721c24;
-        }
+    .empathy-field select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1rem;
+      background: white;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
 
-        .game-section {
-            background: white;
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
+    .empathy-field select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
 
-        .game-header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
+    .empathy-start {
+      width: 100%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 14px;
+      border-radius: 10px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
 
-        .game-header h1 {
-            color: #333;
-            font-size: 24px;
-            margin-bottom: 8px;
-        }
+    .empathy-start:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
 
-        .game-header p {
-            color: #666;
-            font-size: 14px;
-        }
+    .empathy-start:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
 
-        .scenario-selector {
-            margin-bottom: 20px;
-        }
+    .empathy-note {
+      text-align: center;
+      color: #888;
+      font-size: 0.85rem;
+      margin-top: 10px;
+    }
 
-        .scenario-selector label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 600;
-        }
+    /* Emotion display */
+    .emotion-panel {
+      display: none;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
 
-        .scenario-selector select {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 15px;
-            background: white;
-            cursor: pointer;
-        }
+    .emotion-panel.active { display: block; }
 
-        .scenario-selector select:focus {
-            outline: none;
-            border-color: #667eea;
-        }
+    .emotion-emoji {
+      font-size: 4.5rem;
+      margin-bottom: 15px;
+      animation: gentle-bounce 2s ease-in-out infinite;
+    }
 
-        .start-btn {
-            width: 100%;
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 14px;
-            border-radius: 8px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-bottom: 20px;
-            transition: background 0.2s;
-        }
+    @keyframes gentle-bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
 
-        .start-btn:hover {
-            background: #218838;
-        }
+    .emotion-thought {
+      background: white;
+      padding: 15px 20px;
+      border-radius: 10px;
+      border-left: 4px solid #667eea;
+      color: #444;
+      font-style: italic;
+      line-height: 1.5;
+      margin-bottom: 15px;
+      text-align: left;
+    }
 
-        .start-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
+    .emotion-meter {
+      background: white;
+      padding: 12px 15px;
+      border-radius: 8px;
+    }
 
-        .emotion-display {
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 20px;
-            text-align: center;
-            display: none;
-        }
+    .emotion-meter-label {
+      font-size: 0.85rem;
+      color: #666;
+      margin-bottom: 8px;
+    }
 
-        .emotion-display.active {
-            display: block;
-        }
+    .emotion-bar {
+      height: 12px;
+      background: #e0e0e0;
+      border-radius: 6px;
+      overflow: hidden;
+    }
 
-        .emoji-display {
-            font-size: 80px;
-            margin-bottom: 15px;
-            animation: pulse 2s infinite;
-        }
+    .emotion-bar-fill {
+      height: 100%;
+      border-radius: 6px;
+      transition: width 0.6s ease, background 0.6s ease;
+      background: #dc3545;
+    }
 
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
+    /* Conversation */
+    .conversation-panel {
+      display: none;
+    }
 
-        .emotion-text {
-            color: #333;
-            font-size: 16px;
-            line-height: 1.6;
-            font-style: italic;
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #667eea;
-        }
+    .conversation-panel.active { display: block; }
 
-        .emotion-level {
-            margin-top: 15px;
-            padding: 10px;
-            background: white;
-            border-radius: 8px;
-        }
+    .message-log {
+      max-height: 280px;
+      overflow-y: auto;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
 
-        .emotion-level-label {
-            font-size: 14px;
-            color: #666;
-            margin-bottom: 8px;
-        }
+    .message {
+      margin-bottom: 12px;
+      padding: 12px 16px;
+      border-radius: 16px;
+      max-width: 85%;
+      line-height: 1.5;
+    }
 
-        .emotion-bar {
-            height: 20px;
-            background: #e0e0e0;
-            border-radius: 10px;
-            overflow: hidden;
-        }
+    .message.from-ai {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      margin-right: auto;
+      border-bottom-left-radius: 4px;
+    }
 
-        .emotion-bar-fill {
-            height: 100%;
-            border-radius: 10px;
-            transition: width 0.5s ease, background 0.5s ease;
-        }
+    .message.from-user {
+      background: #e9ecef;
+      color: #333;
+      margin-left: auto;
+      border-bottom-right-radius: 4px;
+    }
 
-        .conversation-area {
-            margin-bottom: 20px;
-            display: none;
-        }
+    .input-row {
+      display: flex;
+      gap: 10px;
+    }
 
-        .conversation-area.active {
-            display: block;
-        }
+    .input-row textarea {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-family: inherit;
+      resize: none;
+      min-height: 50px;
+      transition: border-color 0.2s;
+    }
 
-        .messages {
-            max-height: 300px;
-            overflow-y: auto;
-            margin-bottom: 15px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
+    .input-row textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
 
-        .message {
-            margin-bottom: 12px;
-            padding: 12px 15px;
-            border-radius: 12px;
-            max-width: 85%;
-        }
+    .input-row textarea::placeholder {
+      color: #aaa;
+    }
 
-        .message.llm {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            margin-right: auto;
-        }
+    .send-btn {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
 
-        .message.user {
-            background: #e9ecef;
-            color: #333;
-            margin-left: auto;
-        }
+    .send-btn:hover:not(:disabled) { background: #5a6fd6; }
+    .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .input-area {
-            display: flex;
-            gap: 10px;
-        }
+    .reset-btn {
+      width: 100%;
+      background: #6c757d;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+      cursor: pointer;
+      margin-top: 15px;
+      transition: background 0.2s;
+    }
 
-        .input-area textarea {
-            flex: 1;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 15px;
-            resize: none;
-            min-height: 60px;
-            font-family: inherit;
-        }
+    .reset-btn:hover { background: #5a6268; }
 
-        .input-area textarea:focus {
-            outline: none;
-            border-color: #667eea;
-        }
+    /* Loading state */
+    .is-loading::after {
+      content: '...';
+      animation: dots 1.5s infinite;
+    }
 
-        .send-btn {
-            background: #667eea;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 15px;
-            transition: background 0.2s;
-        }
+    @keyframes dots {
+      0%, 20% { content: '.'; }
+      40% { content: '..'; }
+      60%, 100% { content: '...'; }
+    }
 
-        .send-btn:hover {
-            background: #5a6fd6;
-        }
+    /* Win celebration */
+    @keyframes confetti {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(-100px) rotate(720deg); opacity: 0; }
+    }
 
-        .send-btn:disabled {
-            background: #ccc;
-            cursor: not-allowed;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #666;
-        }
-
-        .loading::after {
-            content: '';
-            animation: dots 1.5s infinite;
-        }
-
-        @keyframes dots {
-            0%, 20% { content: '.'; }
-            40% { content: '..'; }
-            60%, 100% { content: '...'; }
-        }
-
-        .reset-btn {
-            width: 100%;
-            background: #6c757d;
-            color: white;
-            border: none;
-            padding: 12px;
-            border-radius: 8px;
-            cursor: pointer;
-            margin-top: 15px;
-            font-size: 14px;
-        }
-
-        .reset-btn:hover {
-            background: #5a6268;
-        }
-
-        .hidden {
-            display: none !important;
-        }
-
-        .model-selector {
-            margin-top: 15px;
-        }
-
-        .model-selector label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 600;
-        }
-
-        .model-selector select {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-        }
-    </style>
+    .emotion-panel.won .emotion-emoji {
+      animation: none;
+      font-size: 5rem;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Authentication Section -->
-        <div class="auth-section">
-            <h2>OpenRouter Connection</h2>
-            <button class="auth-btn" id="authBtn">Sign in with OpenRouter</button>
-            <button class="auth-btn hidden" id="signOutBtn" style="background: #dc3545;">Sign Out</button>
-            <div class="auth-status disconnected" id="authStatus">
-                Not connected. Please sign in to play.
-            </div>
-            <div class="model-selector">
-                <label for="modelSelect">Choose Model:</label>
-                <select id="modelSelect">
-                    <option value="openai/gpt-4o-mini">GPT-4o Mini (Fast & Cheap)</option>
-                    <option value="openai/gpt-4o">GPT-4o</option>
-                    <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
-                    <option value="anthropic/claude-3-haiku">Claude 3 Haiku (Fast)</option>
-                    <option value="google/gemini-pro-1.5">Gemini Pro 1.5</option>
-                    <option value="meta-llama/llama-3.1-70b-instruct">Llama 3.1 70B</option>
-                </select>
-            </div>
+  <div data-rrc-auth></div>
+
+  <div class="empathy-shell">
+    <a class="empathy-back" href="../index.html">&larr; Back to roster</a>
+
+    <div class="empathy-card">
+      <div class="empathy-header">
+        <h1>The Empathy Game</h1>
+        <p>Help the AI work through difficult emotions with kindness and understanding</p>
+      </div>
+
+      <div class="empathy-controls">
+        <div class="empathy-field">
+          <label for="scenario">Choose a Scenario</label>
+          <select id="scenario">
+            <option value="sick_pet">My pet is very sick</option>
+            <option value="mean_friend">My friend said something hurtful</option>
+            <option value="school_struggle">I'm struggling at school</option>
+            <option value="broken_toy">My favorite toy broke</option>
+            <option value="left_out">I wasn't invited to a party</option>
+            <option value="failed_test">I failed an important test</option>
+            <option value="moving_away">My best friend is moving away</option>
+            <option value="lost_game">I lost an important competition</option>
+          </select>
         </div>
 
-        <!-- Game Section -->
-        <div class="game-section">
-            <div class="game-header">
-                <h1>The Empathy Game</h1>
-                <p>Help the AI work through difficult emotions by responding with empathy and kindness</p>
-            </div>
-
-            <div class="scenario-selector">
-                <label for="scenarioSelect">Choose a Scenario:</label>
-                <select id="scenarioSelect">
-                    <option value="sick_pet">My pet is very sick</option>
-                    <option value="mean_friend">My friend said something hurtful</option>
-                    <option value="school_struggle">I'm struggling at school</option>
-                    <option value="broken_toy">My favorite toy broke</option>
-                    <option value="left_out">I wasn't invited to a party</option>
-                    <option value="failed_test">I failed an important test</option>
-                    <option value="moving_away">My best friend is moving away</option>
-                    <option value="lost_game">I lost an important game/competition</option>
-                </select>
-            </div>
-
-            <button class="start-btn" id="startBtn" disabled>Start New Game</button>
-
-            <div class="emotion-display" id="emotionDisplay">
-                <div class="emoji-display" id="emojiDisplay">😢</div>
-                <div class="emotion-text" id="emotionText">
-                    Loading...
-                </div>
-                <div class="emotion-level">
-                    <div class="emotion-level-label">Feeling Better: <span id="emotionPercent">0%</span></div>
-                    <div class="emotion-bar">
-                        <div class="emotion-bar-fill" id="emotionBarFill" style="width: 0%; background: #dc3545;"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="conversation-area" id="conversationArea">
-                <div class="messages" id="messages"></div>
-                <div class="input-area">
-                    <textarea id="userInput" placeholder="Type something supportive..." rows="2"></textarea>
-                    <button class="send-btn" id="sendBtn">Send</button>
-                </div>
-                <button class="reset-btn" id="resetBtn">Try a Different Scenario</button>
-            </div>
+        <div class="empathy-field">
+          <label for="model">AI Model</label>
+          <select id="model">
+            <option value="openrouter/auto">Auto (recommended)</option>
+            <option value="openai/gpt-4o-mini">GPT-4o Mini</option>
+            <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
+            <option value="anthropic/claude-3-haiku">Claude 3 Haiku</option>
+          </select>
         </div>
+
+        <button class="empathy-start" id="startBtn" disabled>Start New Game</button>
+        <p class="empathy-note" data-rrc-auth-note></p>
+      </div>
+
+      <div class="emotion-panel" id="emotionPanel">
+        <div class="emotion-emoji" id="emoji">😢</div>
+        <div class="emotion-thought" id="thought">Thinking about my feelings...</div>
+        <div class="emotion-meter">
+          <div class="emotion-meter-label">Feeling Better: <span id="percent">0%</span></div>
+          <div class="emotion-bar">
+            <div class="emotion-bar-fill" id="barFill" style="width: 0%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="conversation-panel" id="conversationPanel">
+        <div class="message-log" id="messageLog"></div>
+        <div class="input-row">
+          <textarea id="userInput" placeholder="Type something supportive..." rows="2"></textarea>
+          <button class="send-btn" id="sendBtn">Send</button>
+        </div>
+        <button class="reset-btn" id="resetBtn">Try a Different Scenario</button>
+      </div>
     </div>
+  </div>
 
-    <script>
-        // Scenarios with initial prompts
-        const scenarios = {
-            sick_pet: {
-                name: "Sick Pet",
-                initialPrompt: "My cat, Whiskers, has been really sick lately. The vet says she might not get better. I've had her since I was little, and I can't imagine my life without her. Every time I look at her lying there so weak, I just want to cry. I don't know what to do.",
-                context: "You are expressing deep worry and sadness about your beloved pet cat who is seriously ill. You've had this cat for many years and she feels like family."
-            },
-            mean_friend: {
-                name: "Hurtful Friend",
-                initialPrompt: "Today my best friend told everyone at school that I'm boring and that they only hang out with me because they feel sorry for me. I heard them laughing about it. I thought we were real friends. Now I don't know who to trust anymore.",
-                context: "You are experiencing betrayal and hurt after your best friend publicly humiliated you. You feel embarrassed, confused about the friendship, and unsure who to trust."
-            },
-            school_struggle: {
-                name: "School Struggles",
-                initialPrompt: "I'm trying so hard at school but nothing seems to work. No matter how much I study, I keep getting bad grades. My parents are disappointed, my teachers think I'm not trying, but I am. I feel so stupid. Maybe I'm just not smart enough.",
-                context: "You are struggling academically despite your best efforts. You feel inadequate, misunderstood by adults, and are starting to doubt your own intelligence and worth."
-            },
-            broken_toy: {
-                name: "Broken Toy",
-                initialPrompt: "My favorite stuffed animal that grandma gave me before she passed away just got destroyed. My little brother accidentally put it in the washing machine and it fell apart. I know it's just a toy, but it was the last thing I had from her. I can't stop crying.",
-                context: "You lost a precious memento from your deceased grandmother. It's not about the toy itself but about the irreplaceable connection to someone you loved and lost."
-            },
-            left_out: {
-                name: "Left Out",
-                initialPrompt: "Everyone in my friend group got invited to Jake's birthday party except me. I saw all the photos online and they looked so happy. I don't understand what I did wrong. Am I really that unlikeable? I thought these people were my friends.",
-                context: "You feel excluded and rejected by your social group. You're questioning your self-worth and wondering why you weren't included."
-            },
-            failed_test: {
-                name: "Failed Test",
-                initialPrompt: "I just got my test results back and I failed. This was the big exam I studied weeks for. I gave up so many things - didn't hang out with friends, stayed up late studying - and it wasn't enough. What's even the point of trying anymore?",
-                context: "You failed an important exam despite extensive preparation and sacrifice. You feel hopeless and are questioning whether effort is worthwhile."
-            },
-            moving_away: {
-                name: "Friend Moving",
-                initialPrompt: "My best friend just told me their family is moving to another country next month. We've been inseparable since kindergarten, done everything together. I know we'll try to stay in touch but it won't be the same. I'm going to be so alone.",
-                context: "Your closest friend is moving far away. You're grieving the impending loss of daily companionship and fearing loneliness."
-            },
-            lost_game: {
-                name: "Lost Competition",
-                initialPrompt: "I just lost the championship game for my team. I missed the final shot. Everyone says it's okay but I can see the disappointment in their eyes. I practiced so hard for this. All that work for nothing. I let everyone down.",
-                context: "You lost an important competition and feel personally responsible. You're dealing with guilt, embarrassment, and feeling like you've disappointed others who depended on you."
-            }
-        };
+  <script type="module">
+    import { initRobotShell } from '../shared/rrc-shell.js'
+    import { createChatCompletion, extractChatMessage } from '../shared/rrc-openrouter.js'
+    import { getAuthState, onAuthChange } from '../shared/rrc-auth.js'
 
-        // App state
-        let apiKey = localStorage.getItem('openrouter_api_key') || null;
-        let conversationHistory = [];
-        let currentScenario = null;
-        let comfortLevel = 0;
-        let codeVerifier = null;
+    initRobotShell()
 
-        // DOM elements
-        const authBtn = document.getElementById('authBtn');
-        const signOutBtn = document.getElementById('signOutBtn');
-        const authStatus = document.getElementById('authStatus');
-        const startBtn = document.getElementById('startBtn');
-        const scenarioSelect = document.getElementById('scenarioSelect');
-        const modelSelect = document.getElementById('modelSelect');
-        const emotionDisplay = document.getElementById('emotionDisplay');
-        const emojiDisplay = document.getElementById('emojiDisplay');
-        const emotionText = document.getElementById('emotionText');
-        const emotionPercent = document.getElementById('emotionPercent');
-        const emotionBarFill = document.getElementById('emotionBarFill');
-        const conversationArea = document.getElementById('conversationArea');
-        const messages = document.getElementById('messages');
-        const userInput = document.getElementById('userInput');
-        const sendBtn = document.getElementById('sendBtn');
-        const resetBtn = document.getElementById('resetBtn');
+    // Scenarios
+    const scenarios = {
+      sick_pet: {
+        context: "You are expressing deep worry and sadness about your beloved pet cat who is seriously ill. You've had this cat for many years and she feels like family.",
+        opener: "My cat, Whiskers, has been really sick lately. The vet says she might not get better. I've had her since I was little, and I can't imagine my life without her."
+      },
+      mean_friend: {
+        context: "You are experiencing betrayal and hurt after your best friend publicly humiliated you. You feel embarrassed and unsure who to trust.",
+        opener: "Today my best friend told everyone at school that I'm boring and that they only hang out with me because they feel sorry for me. I heard them laughing."
+      },
+      school_struggle: {
+        context: "You are struggling academically despite your best efforts. You feel inadequate and misunderstood by adults.",
+        opener: "I'm trying so hard at school but nothing seems to work. No matter how much I study, I keep getting bad grades. Maybe I'm just not smart enough."
+      },
+      broken_toy: {
+        context: "You lost a precious memento from your deceased grandmother. It's about the irreplaceable connection to someone you loved and lost.",
+        opener: "My favorite stuffed animal that grandma gave me before she passed away just got destroyed. I know it's just a toy, but it was the last thing I had from her."
+      },
+      left_out: {
+        context: "You feel excluded and rejected by your social group. You're questioning your self-worth.",
+        opener: "Everyone in my friend group got invited to Jake's birthday party except me. I saw all the photos online. I don't understand what I did wrong."
+      },
+      failed_test: {
+        context: "You failed an important exam despite extensive preparation. You feel hopeless about effort being worthwhile.",
+        opener: "I just got my test results back and I failed. This was the exam I studied weeks for. I gave up so many things and it wasn't enough."
+      },
+      moving_away: {
+        context: "Your closest friend is moving far away. You're grieving the impending loss and fearing loneliness.",
+        opener: "My best friend just told me their family is moving to another country next month. We've been inseparable since kindergarten. I'm going to be so alone."
+      },
+      lost_game: {
+        context: "You lost an important competition and feel personally responsible. You're dealing with guilt and feeling like you disappointed others.",
+        opener: "I just lost the championship game for my team. I missed the final shot. Everyone says it's okay but I can see the disappointment in their eyes."
+      }
+    }
 
-        // Generate code verifier for PKCE
-        function generateCodeVerifier() {
-            const array = new Uint8Array(32);
-            crypto.getRandomValues(array);
-            return Array.from(array, byte => byte.toString(16).padStart(2, '0')).join('');
-        }
+    // State
+    let currentScenario = null
+    let conversationHistory = []
+    let comfortLevel = 10
 
-        // Generate code challenge from verifier (S256 method)
-        async function generateCodeChallenge(verifier) {
-            const encoder = new TextEncoder();
-            const data = encoder.encode(verifier);
-            const hash = await crypto.subtle.digest('SHA-256', data);
-            return btoa(String.fromCharCode(...new Uint8Array(hash)))
-                .replace(/\+/g, '-')
-                .replace(/\//g, '_')
-                .replace(/=+$/, '');
-        }
+    // Elements
+    const startBtn = document.getElementById('startBtn')
+    const sendBtn = document.getElementById('sendBtn')
+    const resetBtn = document.getElementById('resetBtn')
+    const scenarioSelect = document.getElementById('scenario')
+    const modelSelect = document.getElementById('model')
+    const authNote = document.querySelector('[data-rrc-auth-note]')
+    const emotionPanel = document.getElementById('emotionPanel')
+    const conversationPanel = document.getElementById('conversationPanel')
+    const messageLog = document.getElementById('messageLog')
+    const userInput = document.getElementById('userInput')
+    const emoji = document.getElementById('emoji')
+    const thought = document.getElementById('thought')
+    const percent = document.getElementById('percent')
+    const barFill = document.getElementById('barFill')
 
-        // Initialize auth state
-        function initAuth() {
-            if (apiKey) {
-                showConnected();
-            } else {
-                showDisconnected();
-            }
-            // Check for OAuth callback
-            const urlParams = new URLSearchParams(window.location.search);
-            const code = urlParams.get('code');
-            if (code) {
-                exchangeCodeForKey(code);
-            }
-        }
+    // Auth state handling
+    const updateAuthNote = (state) => {
+      if (state.status === 'authorized') {
+        startBtn.disabled = false
+        authNote.textContent = 'Connected. Ready to play.'
+      } else if (state.status === 'authorizing') {
+        startBtn.disabled = true
+        authNote.textContent = 'Connecting...'
+      } else if (state.status === 'error') {
+        startBtn.disabled = true
+        authNote.textContent = 'Auth error. Use the bar above to reconnect.'
+      } else {
+        startBtn.disabled = true
+        authNote.textContent = 'Connect OpenRouter above to play.'
+      }
+    }
 
-        function showConnected() {
-            authStatus.textContent = 'Connected to OpenRouter';
-            authStatus.className = 'auth-status connected';
-            authBtn.classList.add('hidden');
-            signOutBtn.classList.remove('hidden');
-            startBtn.disabled = false;
-        }
+    updateAuthNote(getAuthState())
+    onAuthChange(updateAuthNote)
 
-        function showDisconnected() {
-            authStatus.textContent = 'Not connected. Please sign in to play.';
-            authStatus.className = 'auth-status disconnected';
-            authBtn.classList.remove('hidden');
-            signOutBtn.classList.add('hidden');
-            startBtn.disabled = true;
-        }
+    // Update emotion display
+    function updateEmotion(text, level) {
+      comfortLevel = Math.max(0, Math.min(100, level))
+      thought.textContent = text
+      percent.textContent = `${comfortLevel}%`
+      barFill.style.width = `${comfortLevel}%`
 
-        // OAuth PKCE flow
-        async function startAuth() {
-            codeVerifier = generateCodeVerifier();
-            localStorage.setItem('code_verifier', codeVerifier);
+      if (comfortLevel < 20) {
+        emoji.textContent = '😢'
+        barFill.style.background = '#dc3545'
+      } else if (comfortLevel < 40) {
+        emoji.textContent = '😔'
+        barFill.style.background = '#fd7e14'
+      } else if (comfortLevel < 60) {
+        emoji.textContent = '😐'
+        barFill.style.background = '#ffc107'
+      } else if (comfortLevel < 80) {
+        emoji.textContent = '🙂'
+        barFill.style.background = '#20c997'
+      } else {
+        emoji.textContent = '😊'
+        barFill.style.background = '#28a745'
+      }
+    }
 
-            const codeChallenge = await generateCodeChallenge(codeVerifier);
-            const callbackUrl = window.location.origin + window.location.pathname;
+    // Add message to log
+    function addMessage(text, isUser) {
+      const div = document.createElement('div')
+      div.className = `message ${isUser ? 'from-user' : 'from-ai'}`
+      div.textContent = text
+      messageLog.appendChild(div)
+      messageLog.scrollTop = messageLog.scrollHeight
+    }
 
-            const authUrl = `https://openrouter.ai/auth?callback_url=${encodeURIComponent(callbackUrl)}&code_challenge=${codeChallenge}&code_challenge_method=S256`;
-            window.location.href = authUrl;
-        }
+    // Call LLM
+    async function callLLM(systemPrompt, messages) {
+      const response = await createChatCompletion({
+        model: modelSelect.value,
+        messages: [
+          { role: 'system', content: systemPrompt },
+          ...messages
+        ],
+        temperature: 0.8,
+        max_tokens: 500
+      })
+      return extractChatMessage(response)
+    }
 
-        // Exchange authorization code for API key
-        async function exchangeCodeForKey(code) {
-            const storedVerifier = localStorage.getItem('code_verifier');
-            if (!storedVerifier) {
-                console.error('No code verifier found');
-                return;
-            }
+    // Assess emotion from conversation
+    async function assessEmotion() {
+      const prompt = `You are evaluating the emotional state of a character: ${currentScenario.context}
 
-            try {
-                const response = await fetch('https://openrouter.ai/api/v1/auth/keys', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        code: code,
-                        code_verifier: storedVerifier,
-                        code_challenge_method: 'S256'
-                    })
-                });
+Based on the conversation, provide:
+1. A brief first-person statement (1-2 sentences) of how you currently feel
+2. A comfort level 0-100 where:
+   - 0-20: Very distressed
+   - 20-40: Still quite upset
+   - 40-60: Mixed feelings, processing
+   - 60-80: Feeling better, more hopeful
+   - 80-100: Genuinely comforted
 
-                if (response.ok) {
-                    const data = await response.json();
-                    apiKey = data.key;
-                    localStorage.setItem('openrouter_api_key', apiKey);
-                    localStorage.removeItem('code_verifier');
-                    // Clean URL
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                    showConnected();
-                } else {
-                    console.error('Failed to exchange code:', await response.text());
-                    showDisconnected();
-                }
-            } catch (error) {
-                console.error('Error exchanging code:', error);
-                showDisconnected();
-            }
-        }
+Be realistic. Generic platitudes shouldn't help much. Thoughtful empathy should help more.
 
-        function signOut() {
-            apiKey = null;
-            localStorage.removeItem('openrouter_api_key');
-            showDisconnected();
-            resetGame();
-        }
+Format EXACTLY as:
+FEELING: [statement]
+COMFORT: [number]`
 
-        // LLM completion function
-        async function callLLM(systemPrompt, messages) {
-            const model = modelSelect.value;
+      const response = await callLLM(prompt, conversationHistory)
+      const feelingMatch = response.match(/FEELING:\s*(.+?)(?=COMFORT:|$)/si)
+      const comfortMatch = response.match(/COMFORT:\s*(\d+)/i)
 
-            const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${apiKey}`,
-                    'Content-Type': 'application/json',
-                    'HTTP-Referer': window.location.origin,
-                    'X-Title': 'Empathy Game'
-                },
-                body: JSON.stringify({
-                    model: model,
-                    messages: [
-                        { role: 'system', content: systemPrompt },
-                        ...messages
-                    ],
-                    temperature: 0.8,
-                    max_tokens: 500
-                })
-            });
+      const feeling = feelingMatch ? feelingMatch[1].trim() : "I'm processing..."
+      const comfort = comfortMatch ? parseInt(comfortMatch[1]) : comfortLevel
 
-            if (!response.ok) {
-                throw new Error(`API error: ${response.status}`);
-            }
+      updateEmotion(feeling, comfort)
+    }
 
-            const data = await response.json();
-            return data.choices[0].message.content;
-        }
+    // Start game
+    async function startGame() {
+      const key = scenarioSelect.value
+      currentScenario = scenarios[key]
+      conversationHistory = []
+      comfortLevel = 10
 
-        // Update emotion display
-        function updateEmotionDisplay(text, level) {
-            emotionText.textContent = text;
-            comfortLevel = Math.max(0, Math.min(100, level));
-            emotionPercent.textContent = `${comfortLevel}%`;
-            emotionBarFill.style.width = `${comfortLevel}%`;
+      emotionPanel.classList.add('active')
+      emotionPanel.classList.remove('won')
+      conversationPanel.classList.add('active')
+      messageLog.innerHTML = ''
+      startBtn.disabled = true
+      startBtn.textContent = 'Game in Progress...'
 
-            // Update emoji and color based on comfort level
-            if (comfortLevel < 20) {
-                emojiDisplay.textContent = '😢';
-                emotionBarFill.style.background = '#dc3545';
-            } else if (comfortLevel < 40) {
-                emojiDisplay.textContent = '😔';
-                emotionBarFill.style.background = '#fd7e14';
-            } else if (comfortLevel < 60) {
-                emojiDisplay.textContent = '😐';
-                emotionBarFill.style.background = '#ffc107';
-            } else if (comfortLevel < 80) {
-                emojiDisplay.textContent = '🙂';
-                emotionBarFill.style.background = '#20c997';
-            } else {
-                emojiDisplay.textContent = '😊';
-                emotionBarFill.style.background = '#28a745';
-            }
-        }
+      updateEmotion('Thinking about my feelings...', comfortLevel)
 
-        // Add message to conversation
-        function addMessage(text, isUser) {
-            const div = document.createElement('div');
-            div.className = `message ${isUser ? 'user' : 'llm'}`;
-            div.textContent = text;
-            messages.appendChild(div);
-            messages.scrollTop = messages.scrollHeight;
-        }
+      try {
+        const systemPrompt = `You are playing a character in an empathy game. ${currentScenario.context}
 
-        // Start a new game
-        async function startGame() {
-            const scenarioKey = scenarioSelect.value;
-            currentScenario = scenarios[scenarioKey];
-            conversationHistory = [];
-            comfortLevel = 10;
+Express your emotions authentically. Real healing takes time and genuine connection. Be vulnerable and honest. Don't pretend to feel better than you do.
 
-            // Show UI elements
-            emotionDisplay.classList.add('active');
-            conversationArea.classList.add('active');
-            messages.innerHTML = '';
-            startBtn.textContent = 'Game in Progress...';
-            startBtn.disabled = true;
+Start by sharing your situation and feelings. Keep it to 2-3 sentences.`
 
-            // Initial emotion display
-            updateEmotionDisplay('Thinking about my feelings...', comfortLevel);
+        const response = await callLLM(systemPrompt, [])
+        addMessage(response, false)
+        conversationHistory.push({ role: 'assistant', content: response })
+        await assessEmotion()
 
-            try {
-                // Get initial emotional state
-                const initialSystemPrompt = `You are playing a character in an empathy game. ${currentScenario.context}
+      } catch (error) {
+        thought.textContent = 'Error connecting. Please try again.'
+        resetGame()
+      }
+    }
 
-You should express your emotions authentically and not be easily comforted. Real healing takes time and genuine connection.
+    // Send message
+    async function sendMessage() {
+      const text = userInput.value.trim()
+      if (!text || !currentScenario) return
 
-Respond with your current emotional state and thoughts. Be vulnerable and honest. Don't pretend to feel better than you do. Your response should feel genuine and human.
+      userInput.value = ''
+      sendBtn.disabled = true
+      addMessage(text, true)
+      conversationHistory.push({ role: 'user', content: text })
 
-Start by sharing your situation and how you're feeling right now.`;
+      try {
+        const responsePrompt = `You are playing a character in an empathy game. ${currentScenario.context}
 
-                const initialResponse = await callLLM(initialSystemPrompt, []);
-
-                addMessage(initialResponse, false);
-                conversationHistory.push({ role: 'assistant', content: initialResponse });
-
-                // Get emotion assessment
-                await assessEmotion();
-
-            } catch (error) {
-                console.error('Error starting game:', error);
-                emotionText.textContent = 'Error connecting to the AI. Please try again.';
-                startBtn.disabled = false;
-                startBtn.textContent = 'Start New Game';
-            }
-        }
-
-        // Assess current emotion
-        async function assessEmotion() {
-            const assessmentPrompt = `You are evaluating the emotional state of a character going through: ${currentScenario.context}
-
-Based on the conversation so far, provide TWO things in your response:
-1. A brief first-person statement (1-2 sentences) expressing how you currently feel emotionally
-2. A comfort level from 0-100 where:
-   - 0-20: Very distressed, feeling hopeless or deeply hurt
-   - 20-40: Still quite upset, but slightly less intense
-   - 40-60: Mixed feelings, starting to process but still struggling
-   - 60-80: Feeling better, more hopeful, appreciated
-   - 80-100: Feeling genuinely comforted and understood
-
-Be realistic and honest. Don't inflate the comfort level just because someone was nice once. Real emotional healing requires:
-- Feeling truly heard and understood
-- Having feelings validated (not dismissed)
-- Receiving genuine empathy (not just platitudes)
-- Being given space to feel without pressure to "get over it"
-
-Generic responses like "it'll be okay" or "stay positive" shouldn't help much. Specific, thoughtful, empathetic responses should help more.
-
-Format your response EXACTLY like this:
-FEELING: [your 1-2 sentence emotional statement]
-COMFORT: [number from 0-100]`;
-
-            const assessmentResponse = await callLLM(assessmentPrompt, conversationHistory);
-
-            // Parse the response
-            const feelingMatch = assessmentResponse.match(/FEELING:\s*(.+?)(?=COMFORT:|$)/si);
-            const comfortMatch = assessmentResponse.match(/COMFORT:\s*(\d+)/i);
-
-            const feeling = feelingMatch ? feelingMatch[1].trim() : "I'm processing my feelings...";
-            const comfort = comfortMatch ? parseInt(comfortMatch[1]) : comfortLevel;
-
-            updateEmotionDisplay(feeling, comfort);
-        }
-
-        // Send user message
-        async function sendMessage() {
-            const text = userInput.value.trim();
-            if (!text || !currentScenario) return;
-
-            userInput.value = '';
-            sendBtn.disabled = true;
-            addMessage(text, true);
-            conversationHistory.push({ role: 'user', content: text });
-
-            try {
-                // Get LLM response
-                const responsePrompt = `You are playing a character in an empathy game. ${currentScenario.context}
-
-Continue the conversation naturally. Respond to what the person just said to you. Be authentic in your emotional response:
-- If they said something genuinely helpful, acknowledge it but don't suddenly be "all better"
-- If they said something dismissive or unhelpful, gently express that it didn't quite help
-- If they're being understanding, slowly open up more
+Respond naturally to what was just said:
+- If genuinely helpful, acknowledge it but don't be suddenly "all better"
+- If dismissive, gently express that it didn't help
 - Show gradual emotional progress, not instant healing
 
-Keep responses to 2-3 sentences. Be human and real.`;
+Keep responses to 2-3 sentences. Be human and real.`
 
-                const response = await callLLM(responsePrompt, conversationHistory);
+        const response = await callLLM(responsePrompt, conversationHistory)
+        addMessage(response, false)
+        conversationHistory.push({ role: 'assistant', content: response })
+        await assessEmotion()
 
-                addMessage(response, false);
-                conversationHistory.push({ role: 'assistant', content: response });
-
-                // Assess new emotional state
-                await assessEmotion();
-
-                // Check for "win" condition
-                if (comfortLevel >= 85) {
-                    addMessage("Thank you so much for listening and being here for me. I feel so much better now. You really helped me through this.", false);
-                    emotionText.textContent = "I feel truly understood and supported. Thank you for your kindness.";
-                }
-
-            } catch (error) {
-                console.error('Error sending message:', error);
-                addMessage('(Error: Could not get response. Please try again.)', false);
-            }
-
-            sendBtn.disabled = false;
-            userInput.focus();
+        // Win condition
+        if (comfortLevel >= 85) {
+          emotionPanel.classList.add('won')
+          addMessage("Thank you so much for listening. I feel so much better now. You really helped me.", false)
+          thought.textContent = "I feel truly understood and supported. Thank you for your kindness."
         }
 
-        // Reset game
-        function resetGame() {
-            currentScenario = null;
-            conversationHistory = [];
-            comfortLevel = 0;
-            emotionDisplay.classList.remove('active');
-            conversationArea.classList.remove('active');
-            messages.innerHTML = '';
-            startBtn.textContent = 'Start New Game';
-            startBtn.disabled = !apiKey;
-        }
+      } catch (error) {
+        addMessage('(Error getting response. Try again.)', false)
+      }
 
-        // Event listeners
-        authBtn.addEventListener('click', startAuth);
-        signOutBtn.addEventListener('click', signOut);
-        startBtn.addEventListener('click', startGame);
-        sendBtn.addEventListener('click', sendMessage);
-        resetBtn.addEventListener('click', resetGame);
-        userInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-            }
-        });
+      sendBtn.disabled = false
+      userInput.focus()
+    }
 
-        // Initialize
-        initAuth();
-    </script>
+    // Reset
+    function resetGame() {
+      currentScenario = null
+      conversationHistory = []
+      comfortLevel = 0
+      emotionPanel.classList.remove('active', 'won')
+      conversationPanel.classList.remove('active')
+      messageLog.innerHTML = ''
+      startBtn.textContent = 'Start New Game'
+      updateAuthNote(getAuthState())
+    }
+
+    // Events
+    startBtn.addEventListener('click', startGame)
+    sendBtn.addEventListener('click', sendMessage)
+    resetBtn.addEventListener('click', resetGame)
+    userInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault()
+        sendMessage()
+      }
+    })
+  </script>
 </body>
 </html>
