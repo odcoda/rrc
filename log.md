@@ -1,3 +1,9 @@
+## 2026-01-14 add empathy game robot
+- rescued empathy-game.html from broken claude branch
+- added to roster on index page
+- deleted orphaned claude/llm-empathy-game-5OidE branch
+- set main as default branch
+
 ## 2026-01-14 repo + pages setup
 fixed incomplete GitHub setup:
 - switched remote to HTTPS (SSH auth was failing)
