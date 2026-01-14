@@ -5,44 +5,390 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Battery Forecast Robot</title>
   <link rel="stylesheet" href="../assets/rrc.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&display=swap');
+
+    body {
+      background: #0a0a0a !important;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .crt-wrapper {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 20px;
+    }
+
+    .crt-monitor {
+      background: #1a1a1a;
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow:
+        0 10px 40px rgba(0,0,0,0.8),
+        inset 0 2px 4px rgba(255,255,255,0.1);
+      max-width: 700px;
+      width: 100%;
+    }
+
+    .crt-bezel {
+      background: #111;
+      border-radius: 10px;
+      padding: 4px;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+    }
+
+    .crt-screen {
+      background: #001100;
+      border-radius: 8px;
+      padding: 25px;
+      position: relative;
+      overflow: hidden;
+      font-family: 'IBM Plex Mono', monospace;
+      min-height: 500px;
+    }
+
+    /* CRT effects */
+    .crt-screen::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.15),
+        rgba(0, 0, 0, 0.15) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .crt-screen::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: radial-gradient(
+        ellipse at center,
+        transparent 0%,
+        rgba(0, 0, 0, 0.3) 100%
+      );
+      pointer-events: none;
+      z-index: 11;
+    }
+
+    /* Screen flicker */
+    @keyframes flicker {
+      0% { opacity: 0.97; }
+      5% { opacity: 1; }
+      10% { opacity: 0.98; }
+      15% { opacity: 1; }
+      20% { opacity: 0.96; }
+      100% { opacity: 1; }
+    }
+
+    .crt-content {
+      animation: flicker 0.15s infinite;
+      position: relative;
+      z-index: 5;
+    }
+
+    .crt-back {
+      color: #00ff00;
+      text-decoration: none;
+      font-size: 0.85rem;
+      opacity: 0.7;
+    }
+    .crt-back:hover { text-decoration: underline; opacity: 1; }
+
+    .crt-header {
+      margin: 20px 0;
+      border-bottom: 1px solid #003300;
+      padding-bottom: 15px;
+    }
+
+    .crt-boot {
+      color: #00aa00;
+      font-size: 0.75rem;
+      margin-bottom: 8px;
+      opacity: 0.7;
+    }
+
+    .crt-title {
+      color: #00ff00;
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0;
+      text-shadow: 0 0 10px #00ff00;
+    }
+
+    .crt-ascii {
+      color: #00cc00;
+      font-size: 0.7rem;
+      line-height: 1.1;
+      margin: 15px 0;
+      opacity: 0.8;
+    }
+
+    .crt-desc {
+      color: #00bb00;
+      font-size: 0.9rem;
+      margin-top: 10px;
+    }
+
+    .crt-prompt {
+      color: #00ff00;
+    }
+
+    .crt-section {
+      margin-top: 20px;
+    }
+
+    .crt-section-title {
+      color: #00aa00;
+      font-size: 0.8rem;
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+
+    .crt-field {
+      margin-bottom: 12px;
+    }
+
+    .crt-field label {
+      display: block;
+      color: #00cc00;
+      font-size: 0.85rem;
+      margin-bottom: 4px;
+    }
+
+    .crt-field textarea,
+    .crt-field select {
+      width: 100%;
+      background: #001800;
+      border: 1px solid #004400;
+      color: #00ff00;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.95rem;
+      padding: 10px;
+      border-radius: 2px;
+      box-sizing: border-box;
+    }
+
+    .crt-field textarea {
+      min-height: 80px;
+      resize: vertical;
+    }
+
+    .crt-field textarea::placeholder {
+      color: #006600;
+    }
+
+    .crt-field select {
+      cursor: pointer;
+    }
+
+    .crt-field select option {
+      background: #001800;
+      color: #00ff00;
+    }
+
+    .crt-button {
+      background: #003300;
+      color: #00ff00;
+      border: 1px solid #00ff00;
+      padding: 10px 20px;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.9rem;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: all 0.1s;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .crt-button:hover:not(:disabled) {
+      background: #00ff00;
+      color: #001100;
+      box-shadow: 0 0 15px #00ff00;
+    }
+
+    .crt-button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .crt-note {
+      color: #007700;
+      font-size: 0.8rem;
+      margin-top: 10px;
+    }
+
+    .crt-output-area {
+      background: #000800;
+      border: 1px solid #003300;
+      padding: 15px;
+      margin-top: 15px;
+      min-height: 100px;
+      border-radius: 2px;
+    }
+
+    .crt-output {
+      color: #00ff00;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+    }
+
+    .crt-output.is-loading::after {
+      content: '_';
+      animation: cursor-blink 0.7s infinite;
+    }
+
+    @keyframes cursor-blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+
+    .crt-cursor {
+      display: inline-block;
+      width: 8px;
+      height: 14px;
+      background: #00ff00;
+      animation: cursor-blink 0.7s infinite;
+      vertical-align: middle;
+      margin-left: 2px;
+    }
+
+    /* Battery gauge ASCII art */
+    .battery-gauge {
+      font-size: 0.75rem;
+      line-height: 1.2;
+      color: #00cc00;
+      margin-top: 15px;
+      text-shadow: 0 0 3px rgba(0, 255, 0, 0.3);
+    }
+
+    /* LED indicator */
+    .crt-led {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #003300;
+      margin-left: 10px;
+      vertical-align: middle;
+      box-shadow: inset 0 1px 2px rgba(0,0,0,0.5);
+    }
+
+    .crt-led.on {
+      background: #00ff00;
+      box-shadow: 0 0 8px #00ff00, inset 0 1px 2px rgba(255,255,255,0.3);
+      animation: led-pulse 2s infinite;
+    }
+
+    @keyframes led-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    /* Power button */
+    .crt-controls {
+      display: flex;
+      justify-content: flex-end;
+      padding: 10px 5px 0;
+      gap: 15px;
+    }
+
+    .crt-control-label {
+      color: #333;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.6rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .crt-power-led {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #00ff00;
+      box-shadow: 0 0 6px #00ff00;
+      margin: 0 auto 3px;
+    }
+  </style>
 </head>
 <body>
   <div data-rrc-auth></div>
 
-  <main class="rrc-shell">
-    <a class="rrc-backlink" href="../index.html">Back to roster</a>
+  <div class="crt-wrapper">
+    <div class="crt-monitor">
+      <div class="crt-bezel">
+        <div class="crt-screen">
+          <div class="crt-content">
+            <a class="crt-back" href="../index.html">&lt;-- RETURN TO ROSTER</a>
 
-    <section class="rrc-hero" style="margin-top: 16px;">
-      <h1>Battery Forecast Robot</h1>
-      <p>Describe a situation and I will issue a playful battery-status forecast.</p>
-    </section>
+            <div class="crt-header">
+              <div class="crt-boot">BIOS v2.31 ... OK</div>
+              <div class="crt-boot">LOADING BATTERY_FORECAST.EXE ...</div>
+              <h1 class="crt-title">&gt; BATTERY FORECAST<span class="crt-led on"></span></h1>
+              <pre class="crt-ascii">
+    ╔═══════════════╗
+    ║ ▓▓▓▓▓▓▓▓░░░░ ║██
+    ╚═══════════════╝
+              </pre>
+              <p class="crt-desc"><span class="crt-prompt">$</span> Describe a situation. Receive battery status forecast.</p>
+            </div>
 
-    <section class="rrc-panel">
-      <h2>Inputs</h2>
-      <form data-rrc-form>
-        <div class="rrc-field">
-          <label for="situation">Situation</label>
-          <textarea id="situation" name="situation" placeholder="I have three meetings and a long train ride ahead."></textarea>
+            <div class="crt-section">
+              <div class="crt-section-title">[INPUT PARAMETERS]</div>
+              <form data-rrc-form>
+                <div class="crt-field">
+                  <label for="situation">situation&gt;</label>
+                  <textarea id="situation" name="situation" placeholder="I have three meetings and a long train ride ahead."></textarea>
+                </div>
+                <div class="crt-field">
+                  <label for="tone">tone&gt;</label>
+                  <select id="tone" name="tone">
+                    <option value="gentle">gentle</option>
+                    <option value="deadpan">deadpan</option>
+                    <option value="dramatic">dramatic</option>
+                    <option value="retro sci-fi">retro_sci-fi</option>
+                  </select>
+                </div>
+                <button class="crt-button" type="submit" data-rrc-submit>EXECUTE SCAN</button>
+                <p class="crt-note" data-rrc-auth-note></p>
+              </form>
+            </div>
+
+            <div class="crt-section">
+              <div class="crt-section-title">[DIAGNOSTIC OUTPUT]</div>
+              <div class="crt-output-area">
+                <div class="crt-output" data-rrc-output>Awaiting input...<span class="crt-cursor"></span></div>
+                <div class="battery-gauge" data-battery-gauge></div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="rrc-field">
-          <label for="tone">Tone</label>
-          <select id="tone" name="tone">
-            <option value="gentle">Gentle</option>
-            <option value="deadpan">Deadpan</option>
-            <option value="dramatic">Dramatic</option>
-            <option value="retro sci-fi">Retro sci-fi</option>
-          </select>
+      </div>
+      <div class="crt-controls">
+        <div>
+          <div class="crt-power-led"></div>
+          <div class="crt-control-label">Power</div>
         </div>
-        <button class="rrc-button" type="submit" data-rrc-submit>Check battery</button>
-        <p class="rrc-note" data-rrc-auth-note></p>
-      </form>
-    </section>
-
-    <section class="rrc-panel">
-      <h2>Battery report</h2>
-      <div class="rrc-output" data-rrc-output></div>
-    </section>
-  </main>
+      </div>
+    </div>
+  </div>
 
   <script type="module">
     import { initRobotShell } from '../shared/rrc-shell.js'
@@ -54,6 +400,7 @@
     const form = document.querySelector('[data-rrc-form]')
     const submitButton = document.querySelector('[data-rrc-submit]')
     const output = document.querySelector('[data-rrc-output]')
+    const batteryGauge = document.querySelector('[data-battery-gauge]')
     const authNote = document.querySelector('[data-rrc-auth-note]')
     const situationField = document.querySelector('#situation')
     const toneField = document.querySelector('#tone')
@@ -63,33 +410,62 @@
     const updateAuthNote = (state) => {
       if (state.status === 'authorized') {
         submitButton.disabled = false
-        authNote.textContent = 'OpenRouter connected. Ready to check battery.'
+        authNote.textContent = '> CONNECTION ESTABLISHED. READY.'
       } else if (state.status === 'authorizing') {
         submitButton.disabled = true
-        authNote.textContent = 'Connecting to OpenRouter...'
+        authNote.textContent = '> ESTABLISHING UPLINK...'
       } else if (state.status === 'error') {
         submitButton.disabled = true
-        authNote.textContent = 'OpenRouter auth error. Use the top bar to reconnect.'
+        authNote.textContent = '> ERROR: AUTH FAILURE. RECONNECT.'
       } else {
         submitButton.disabled = true
-        authNote.textContent = 'Connect OpenRouter in the top bar to run this robot.'
+        authNote.textContent = '> AWAITING OPENROUTER AUTH...'
       }
     }
 
     updateAuthNote(getAuthState())
     onAuthChange(updateAuthNote)
 
+    // Draw ASCII battery gauge
+    function drawBattery(percent) {
+      const filled = Math.round(percent / 10)
+      const empty = 10 - filled
+      const bar = '▓'.repeat(filled) + '░'.repeat(empty)
+      return `
+┌──────────────┐
+│ ${bar} │██
+└──────────────┘
+      CHARGE: ${percent}%`
+    }
+
+    // Typewriter effect
+    async function typewrite(element, text, speed = 25) {
+      element.innerHTML = ''
+      for (let i = 0; i < text.length; i++) {
+        element.innerHTML += text[i] === '\n' ? '<br>' : text[i]
+        await new Promise(r => setTimeout(r, speed))
+      }
+      element.innerHTML += '<span class="crt-cursor"></span>'
+    }
+
+    // Extract battery percentage from response
+    function extractPercent(text) {
+      const match = text.match(/(\d{1,3})%/)
+      return match ? parseInt(match[1], 10) : 50
+    }
+
     form.addEventListener('submit', async (event) => {
       event.preventDefault()
 
       const situation = situationField.value.trim()
       if (!situation) {
-        output.textContent = 'Add a situation before checking the battery.'
+        output.innerHTML = 'ERROR: NO SITUATION PROVIDED<span class="crt-cursor"></span>'
         return
       }
 
-      output.textContent = 'Running diagnostics'
+      output.innerHTML = 'SCANNING'
       output.classList.add('is-loading')
+      batteryGauge.textContent = ''
       submitButton.disabled = true
 
       try {
@@ -107,11 +483,19 @@
         })
 
         const message = extractChatMessage(response)
-        output.textContent = message || 'No response returned.'
-      } catch (error) {
-        output.textContent = error instanceof Error ? error.message : 'Unexpected error.'
-      } finally {
         output.classList.remove('is-loading')
+
+        if (message) {
+          await typewrite(output, message)
+          const percent = extractPercent(message)
+          batteryGauge.textContent = drawBattery(percent)
+        } else {
+          output.innerHTML = 'NO RESPONSE RECEIVED<span class="crt-cursor"></span>'
+        }
+      } catch (error) {
+        output.classList.remove('is-loading')
+        output.innerHTML = `ERROR: ${error instanceof Error ? error.message : 'UNEXPECTED FAILURE'}<span class="crt-cursor"></span>`
+      } finally {
         updateAuthNote(getAuthState())
       }
     })

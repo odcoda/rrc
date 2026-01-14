@@ -5,45 +5,317 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Roll Call Robot</title>
   <link rel="stylesheet" href="../assets/rrc.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+
+    body {
+      background: #1a1a2e !important;
+      min-height: 100vh;
+    }
+
+    .marquee-shell {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 20px;
+      font-family: 'VT323', monospace;
+    }
+
+    .marquee-back {
+      color: #ff6b35;
+      text-decoration: none;
+      font-size: 1.2rem;
+      display: inline-block;
+      margin-bottom: 10px;
+    }
+    .marquee-back:hover { text-decoration: underline; }
+
+    .marquee-board {
+      background: #0f0f1a;
+      border: 8px solid #2a2a4a;
+      border-radius: 8px;
+      padding: 30px;
+      box-shadow:
+        0 0 20px rgba(255, 200, 50, 0.1),
+        inset 0 0 60px rgba(0,0,0,0.5);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .marquee-board::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.1) 2px,
+        rgba(0,0,0,0.1) 4px
+      );
+      pointer-events: none;
+    }
+
+    .marquee-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .marquee-subtitle {
+      color: #ff6b35;
+      font-size: 1rem;
+      letter-spacing: 4px;
+      margin-bottom: 8px;
+      animation: blink-subtle 2s infinite;
+    }
+
+    @keyframes blink-subtle {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    .marquee-title {
+      color: #ffd700;
+      font-size: 3rem;
+      text-shadow:
+        0 0 10px #ffd700,
+        0 0 20px #ff8c00,
+        0 0 30px #ff6b35;
+      margin: 0;
+      letter-spacing: 3px;
+      animation: glow-pulse 3s ease-in-out infinite;
+    }
+
+    @keyframes glow-pulse {
+      0%, 100% { text-shadow: 0 0 10px #ffd700, 0 0 20px #ff8c00, 0 0 30px #ff6b35; }
+      50% { text-shadow: 0 0 15px #ffd700, 0 0 30px #ff8c00, 0 0 45px #ff6b35; }
+    }
+
+    .marquee-desc {
+      color: #8888aa;
+      font-size: 1.1rem;
+      text-align: center;
+      margin-top: 10px;
+    }
+
+    .marquee-section {
+      background: rgba(255,255,255,0.03);
+      border: 2px solid #3a3a5a;
+      border-radius: 4px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+
+    .marquee-section h2 {
+      color: #ff6b35;
+      font-size: 1.4rem;
+      margin: 0 0 15px 0;
+      letter-spacing: 2px;
+      border-bottom: 1px solid #3a3a5a;
+      padding-bottom: 8px;
+    }
+
+    .marquee-field {
+      margin-bottom: 15px;
+    }
+
+    .marquee-field label {
+      display: block;
+      color: #aaaacc;
+      font-size: 1rem;
+      margin-bottom: 6px;
+      letter-spacing: 1px;
+    }
+
+    .marquee-field textarea,
+    .marquee-field select {
+      width: 100%;
+      background: #0a0a14;
+      border: 2px solid #4a4a6a;
+      color: #ffd700;
+      font-family: 'VT323', monospace;
+      font-size: 1.2rem;
+      padding: 12px;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+
+    .marquee-field textarea {
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .marquee-field textarea::placeholder {
+      color: #5a5a7a;
+    }
+
+    .marquee-field select option {
+      background: #0a0a14;
+      color: #ffd700;
+    }
+
+    .marquee-button {
+      background: linear-gradient(180deg, #ff8c00 0%, #ff6b35 100%);
+      color: #1a1a2e;
+      border: none;
+      padding: 15px 30px;
+      font-family: 'VT323', monospace;
+      font-size: 1.4rem;
+      letter-spacing: 2px;
+      cursor: pointer;
+      border-radius: 4px;
+      text-transform: uppercase;
+      box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+      transition: all 0.2s;
+    }
+
+    .marquee-button:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 107, 53, 0.5);
+    }
+
+    .marquee-button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .marquee-note {
+      color: #6a6a8a;
+      font-size: 0.95rem;
+      margin-top: 12px;
+    }
+
+    .marquee-output {
+      color: #ffd700;
+      font-size: 1.3rem;
+      line-height: 1.8;
+      white-space: pre-wrap;
+      min-height: 60px;
+      text-shadow: 0 0 5px rgba(255, 215, 0, 0.3);
+    }
+
+    .marquee-output.is-loading::after {
+      content: '...';
+      animation: loading-dots 1.5s infinite;
+    }
+
+    @keyframes loading-dots {
+      0% { content: '.'; }
+      33% { content: '..'; }
+      66% { content: '...'; }
+    }
+
+    /* Decorative corner lights */
+    .corner-light {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ff6b35;
+      box-shadow: 0 0 10px #ff6b35;
+      animation: corner-blink 1s infinite;
+    }
+    .corner-light.tl { top: 10px; left: 10px; }
+    .corner-light.tr { top: 10px; right: 10px; animation-delay: 0.25s; }
+    .corner-light.bl { bottom: 10px; left: 10px; animation-delay: 0.5s; }
+    .corner-light.br { bottom: 10px; right: 10px; animation-delay: 0.75s; }
+
+    @keyframes corner-blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* Running lights at top */
+    .running-lights {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .running-light {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #ffd700;
+      box-shadow: 0 0 8px #ffd700;
+      animation: chase 2s infinite;
+    }
+    .running-light:nth-child(1) { animation-delay: 0s; }
+    .running-light:nth-child(2) { animation-delay: 0.15s; }
+    .running-light:nth-child(3) { animation-delay: 0.3s; }
+    .running-light:nth-child(4) { animation-delay: 0.45s; }
+    .running-light:nth-child(5) { animation-delay: 0.6s; }
+    .running-light:nth-child(6) { animation-delay: 0.75s; }
+    .running-light:nth-child(7) { animation-delay: 0.9s; }
+    .running-light:nth-child(8) { animation-delay: 1.05s; }
+    .running-light:nth-child(9) { animation-delay: 1.2s; }
+
+    @keyframes chase {
+      0%, 20% { opacity: 1; transform: scale(1.1); }
+      30%, 100% { opacity: 0.3; transform: scale(1); }
+    }
+  </style>
 </head>
 <body>
   <div data-rrc-auth></div>
 
-  <main class="rrc-shell">
-    <a class="rrc-backlink" href="../index.html">Back to roster</a>
+  <div class="marquee-shell">
+    <a class="marquee-back" href="../index.html">&larr; BACK TO ROSTER</a>
 
-    <section class="rrc-hero" style="margin-top: 16px;">
-      <h1>Roll Call Robot</h1>
-      <p>Give me a list of names and a vibe. I will turn it into a playful roll call.</p>
-    </section>
+    <div class="marquee-board">
+      <div class="corner-light tl"></div>
+      <div class="corner-light tr"></div>
+      <div class="corner-light bl"></div>
+      <div class="corner-light br"></div>
 
-    <section class="rrc-panel">
-      <h2>Inputs</h2>
-      <form data-rrc-form>
-        <div class="rrc-field">
-          <label for="names">Names or characters</label>
-          <textarea id="names" name="names" placeholder="Ariadne\nBaker\nCallisto"></textarea>
-        </div>
-        <div class="rrc-field">
-          <label for="vibe">Vibe</label>
-          <select id="vibe" name="vibe">
-            <option value="pep rally">Pep rally</option>
-            <option value="quiet roll call">Quiet roll call</option>
-            <option value="space station">Space station</option>
-            <option value="mystic choir">Mystic choir</option>
-            <option value="neon arcade">Neon arcade</option>
-          </select>
-        </div>
-        <button class="rrc-button" type="submit" data-rrc-submit>Call the roll</button>
-        <p class="rrc-note" data-rrc-auth-note></p>
-      </form>
-    </section>
+      <div class="running-lights">
+        <div class="running-light"></div>
+        <div class="running-light"></div>
+        <div class="running-light"></div>
+        <div class="running-light"></div>
+        <div class="running-light"></div>
+        <div class="running-light"></div>
+        <div class="running-light"></div>
+        <div class="running-light"></div>
+        <div class="running-light"></div>
+      </div>
 
-    <section class="rrc-panel">
-      <h2>Roll call output</h2>
-      <div class="rrc-output" data-rrc-output></div>
-    </section>
-  </main>
+      <div class="marquee-header">
+        <div class="marquee-subtitle">★ NOW ANNOUNCING ★</div>
+        <h1 class="marquee-title">ROLL CALL</h1>
+        <p class="marquee-desc">Give me names and a vibe. I'll make it a show.</p>
+      </div>
+
+      <div class="marquee-section">
+        <h2>// INPUTS</h2>
+        <form data-rrc-form>
+          <div class="marquee-field">
+            <label for="names">NAMES OR CHARACTERS</label>
+            <textarea id="names" name="names" placeholder="Ariadne&#10;Baker&#10;Callisto"></textarea>
+          </div>
+          <div class="marquee-field">
+            <label for="vibe">VIBE</label>
+            <select id="vibe" name="vibe">
+              <option value="pep rally">Pep rally</option>
+              <option value="quiet roll call">Quiet roll call</option>
+              <option value="space station">Space station</option>
+              <option value="mystic choir">Mystic choir</option>
+              <option value="neon arcade">Neon arcade</option>
+            </select>
+          </div>
+          <button class="marquee-button" type="submit" data-rrc-submit>CALL THE ROLL</button>
+          <p class="marquee-note" data-rrc-auth-note></p>
+        </form>
+      </div>
+
+      <div class="marquee-section">
+        <h2>// OUTPUT</h2>
+        <div class="marquee-output" data-rrc-output></div>
+      </div>
+    </div>
+  </div>
 
   <script type="module">
     import { initRobotShell } from '../shared/rrc-shell.js'
@@ -64,32 +336,45 @@
     const updateAuthNote = (state) => {
       if (state.status === 'authorized') {
         submitButton.disabled = false
-        authNote.textContent = 'OpenRouter connected. Ready to roll.'
+        authNote.textContent = 'SYSTEM READY. AWAITING ROLL CALL.'
       } else if (state.status === 'authorizing') {
         submitButton.disabled = true
-        authNote.textContent = 'Connecting to OpenRouter...'
+        authNote.textContent = 'CONNECTING TO OPENROUTER...'
       } else if (state.status === 'error') {
         submitButton.disabled = true
-        authNote.textContent = 'OpenRouter auth error. Use the top bar to reconnect.'
+        authNote.textContent = 'AUTH ERROR. RECONNECT VIA TOP BAR.'
       } else {
         submitButton.disabled = true
-        authNote.textContent = 'Connect OpenRouter in the top bar to run this robot.'
+        authNote.textContent = 'CONNECT OPENROUTER TO ACTIVATE.'
       }
     }
 
     updateAuthNote(getAuthState())
     onAuthChange(updateAuthNote)
 
+    // Typewriter effect for output
+    async function typewrite(element, text, speed = 20) {
+      element.textContent = ''
+      for (let i = 0; i < text.length; i++) {
+        element.textContent += text[i]
+        if (text[i] === '\n') {
+          await new Promise(r => setTimeout(r, speed * 3))
+        } else {
+          await new Promise(r => setTimeout(r, speed))
+        }
+      }
+    }
+
     form.addEventListener('submit', async (event) => {
       event.preventDefault()
 
       const names = namesField.value.trim()
       if (!names) {
-        output.textContent = 'Add at least one name before calling the roll.'
+        output.textContent = 'ADD NAMES BEFORE CALLING THE ROLL.'
         return
       }
 
-      output.textContent = 'Summoning roll call'
+      output.textContent = 'SUMMONING ROLL CALL'
       output.classList.add('is-loading')
       submitButton.disabled = true
 
@@ -108,11 +393,12 @@
         })
 
         const message = extractChatMessage(response)
-        output.textContent = message || 'No response returned.'
-      } catch (error) {
-        output.textContent = error instanceof Error ? error.message : 'Unexpected error.'
-      } finally {
         output.classList.remove('is-loading')
+        await typewrite(output, message || 'NO RESPONSE RETURNED.')
+      } catch (error) {
+        output.classList.remove('is-loading')
+        output.textContent = error instanceof Error ? error.message : 'UNEXPECTED ERROR.'
+      } finally {
         updateAuthNote(getAuthState())
       }
     })

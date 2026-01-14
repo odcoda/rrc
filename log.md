@@ -1,3 +1,8 @@
+## 2026-01-14 unique robot styling
+gave each example robot a distinct visual personality:
+- roll-call: stadium marquee theme with running lights, glowing text, typewriter output
+- battery-forecast: retro CRT terminal with scanlines, green phosphor, ASCII battery gauge
+
 ## 2026-01-14 add empathy game robot
 - rescued empathy-game.html from broken claude branch
 - added to roster on index page
