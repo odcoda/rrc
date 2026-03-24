@@ -1,0 +1,1573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Studio Buddy - Robot Roll Call</title>
+  <link rel="stylesheet" href="../assets/rrc.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;500;700;800&display=swap');
+
+    :root {
+      --buddy-ink: #273132;
+      --buddy-soft-ink: #566264;
+      --buddy-peach: #f8d4bf;
+      --buddy-coral: #ec7c65;
+      --buddy-mint: #8ecdb2;
+      --buddy-sun: #f8ba4d;
+      --buddy-paper: rgba(255, 249, 240, 0.9);
+      --buddy-paper-strong: rgba(255, 252, 247, 0.96);
+      --buddy-line: rgba(39, 49, 50, 0.12);
+      --buddy-shadow: 0 24px 60px rgba(96, 63, 34, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--buddy-ink);
+      font-family: 'Manrope', sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(255, 235, 196, 0.9), transparent 36%),
+        radial-gradient(circle at 85% 12%, rgba(142, 205, 178, 0.78), transparent 24%),
+        radial-gradient(circle at 20% 90%, rgba(236, 124, 101, 0.24), transparent 28%),
+        linear-gradient(180deg, #fff4df 0%, #fefbf4 48%, #f8f2ea 100%) !important;
+    }
+
+    .buddy-shell {
+      max-width: 1240px;
+      margin: 0 auto;
+      padding: 24px 18px 56px;
+    }
+
+    .buddy-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #7b5548;
+      text-decoration: none;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .buddy-back:hover {
+      text-decoration: underline;
+    }
+
+    .buddy-hero,
+    .buddy-panel {
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      border-radius: 30px;
+      background: var(--buddy-paper);
+      box-shadow: var(--buddy-shadow);
+      backdrop-filter: blur(12px);
+    }
+
+    .buddy-hero {
+      padding: 28px;
+      margin-bottom: 22px;
+    }
+
+    .buddy-hero::before,
+    .buddy-hero::after,
+    .buddy-panel::before {
+      content: '';
+      position: absolute;
+      border-radius: 999px;
+      pointer-events: none;
+    }
+
+    .buddy-hero::before {
+      width: 260px;
+      height: 260px;
+      right: -90px;
+      top: -120px;
+      background: rgba(248, 212, 191, 0.8);
+    }
+
+    .buddy-hero::after {
+      width: 190px;
+      height: 190px;
+      right: 160px;
+      bottom: -110px;
+      background: rgba(142, 205, 178, 0.32);
+    }
+
+    .buddy-panel::before {
+      width: 140px;
+      height: 140px;
+      right: -50px;
+      top: -70px;
+      background: rgba(248, 186, 77, 0.15);
+    }
+
+    .buddy-sparkles {
+      display: flex;
+      gap: 10px;
+      font-size: 1.25rem;
+      margin-bottom: 12px;
+    }
+
+    .buddy-sparkles span {
+      animation: drift 3.4s ease-in-out infinite;
+    }
+
+    .buddy-sparkles span:nth-child(2) {
+      animation-delay: 0.45s;
+    }
+
+    .buddy-sparkles span:nth-child(3) {
+      animation-delay: 0.9s;
+    }
+
+    @keyframes drift {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .buddy-kicker,
+    .panel-kicker {
+      margin: 0 0 8px;
+      color: #9b664f;
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .buddy-hero h1,
+    .panel-heading h2 {
+      font-family: 'Fraunces', serif;
+      margin: 0;
+      line-height: 1.05;
+    }
+
+    .buddy-hero h1 {
+      max-width: 620px;
+      font-size: clamp(2.4rem, 5vw, 4.5rem);
+    }
+
+    .buddy-hero p {
+      max-width: 720px;
+      margin: 14px 0 0;
+      color: var(--buddy-soft-ink);
+      font-size: 1.04rem;
+      line-height: 1.6;
+    }
+
+    .buddy-stat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 24px;
+    }
+
+    .buddy-stat {
+      position: relative;
+      z-index: 1;
+      padding: 18px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.76);
+      border: 1px solid rgba(39, 49, 50, 0.08);
+    }
+
+    .buddy-stat__label {
+      display: block;
+      color: #8a7064;
+      font-size: 0.82rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .buddy-stat__value {
+      display: block;
+      margin-top: 8px;
+      font-size: 2.2rem;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .buddy-stat__note {
+      display: block;
+      margin-top: 8px;
+      color: var(--buddy-soft-ink);
+      font-size: 0.94rem;
+    }
+
+    .buddy-banner {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .buddy-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid rgba(39, 49, 50, 0.08);
+      color: #624d47;
+      font-size: 0.94rem;
+      font-weight: 700;
+    }
+
+    .buddy-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+      gap: 20px;
+      align-items: start;
+    }
+
+    .buddy-panel {
+      padding: 22px;
+    }
+
+    .buddy-panel--tall {
+      grid-row: span 2;
+    }
+
+    .panel-heading {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .panel-heading p {
+      margin: 8px 0 0;
+      color: var(--buddy-soft-ink);
+      line-height: 1.55;
+    }
+
+    .buddy-quiet-button,
+    .buddy-secondary,
+    .buddy-primary {
+      appearance: none;
+      border: 0;
+      border-radius: 16px;
+      cursor: pointer;
+      font: inherit;
+      font-weight: 800;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+    }
+
+    .buddy-primary {
+      padding: 13px 18px;
+      color: white;
+      background: linear-gradient(135deg, #ec7c65 0%, #f1a74f 100%);
+      box-shadow: 0 14px 28px rgba(236, 124, 101, 0.24);
+    }
+
+    .buddy-secondary,
+    .buddy-quiet-button {
+      padding: 11px 16px;
+      color: #6a5148;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(39, 49, 50, 0.12);
+    }
+
+    .buddy-primary:hover:not(:disabled),
+    .buddy-secondary:hover:not(:disabled),
+    .buddy-quiet-button:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+
+    .buddy-primary:disabled,
+    .buddy-secondary:disabled,
+    .buddy-quiet-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .buddy-form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .buddy-field {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+
+    .buddy-field--full {
+      grid-column: 1 / -1;
+    }
+
+    .buddy-field label {
+      color: #6f5b53;
+      font-size: 0.88rem;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    .buddy-field input,
+    .buddy-field textarea,
+    .buddy-field select {
+      width: 100%;
+      padding: 13px 14px;
+      border: 1px solid var(--buddy-line);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.74);
+      color: var(--buddy-ink);
+      font: inherit;
+      line-height: 1.45;
+    }
+
+    .buddy-field textarea {
+      min-height: 108px;
+      resize: vertical;
+    }
+
+    .buddy-field input:focus,
+    .buddy-field textarea:focus,
+    .buddy-field select:focus {
+      outline: 2px solid rgba(236, 124, 101, 0.16);
+      border-color: rgba(236, 124, 101, 0.45);
+    }
+
+    .buddy-form-actions,
+    .buddy-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .buddy-muted {
+      color: #7c6e68;
+      font-size: 0.9rem;
+      line-height: 1.55;
+    }
+
+    .project-list {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .project-card {
+      padding: 16px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.78);
+      border: 1px solid rgba(39, 49, 50, 0.08);
+      transition: border-color 0.15s ease, transform 0.15s ease;
+    }
+
+    .project-card.is-selected {
+      border-color: rgba(236, 124, 101, 0.45);
+      transform: translateY(-1px);
+      box-shadow: 0 16px 26px rgba(236, 124, 101, 0.12);
+    }
+
+    .project-card__top {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .project-card__emoji {
+      font-size: 1.35rem;
+    }
+
+    .project-card h3 {
+      margin: 4px 0 0;
+      font-family: 'Fraunces', serif;
+      font-size: 1.3rem;
+    }
+
+    .project-card__summary {
+      margin: 10px 0 0;
+      color: var(--buddy-soft-ink);
+      line-height: 1.55;
+      font-size: 0.95rem;
+    }
+
+    .project-card__meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+      color: #8a7064;
+      font-size: 0.84rem;
+      font-weight: 700;
+    }
+
+    .project-card__pulse {
+      display: flex;
+      gap: 6px;
+      margin-top: 14px;
+    }
+
+    .pulse-dot {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      background: rgba(39, 49, 50, 0.08);
+    }
+
+    .pulse-dot.is-on {
+      background: linear-gradient(180deg, #8ecdb2 0%, #5eb193 100%);
+      box-shadow: 0 6px 14px rgba(94, 177, 147, 0.24);
+    }
+
+    .project-card__actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .project-card__actions button {
+      flex: 1;
+    }
+
+    .buddy-empty {
+      padding: 16px;
+      border-radius: 20px;
+      border: 1px dashed rgba(39, 49, 50, 0.18);
+      color: var(--buddy-soft-ink);
+      background: rgba(255, 255, 255, 0.44);
+      line-height: 1.6;
+    }
+
+    .garden-strip {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 4px 0 16px;
+      font-size: 1.24rem;
+    }
+
+    .garden-strip strong {
+      font-size: 0.95rem;
+      color: #6f5b53;
+    }
+
+    .entry-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .entry-card {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 12px;
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(39, 49, 50, 0.08);
+    }
+
+    .entry-card__badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: rgba(248, 212, 191, 0.56);
+      font-size: 1.15rem;
+    }
+
+    .entry-card__meta {
+      color: #8a7064;
+      font-size: 0.82rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .entry-card__text {
+      margin-top: 6px;
+      color: var(--buddy-ink);
+      line-height: 1.55;
+      font-size: 0.94rem;
+    }
+
+    .notebook-note {
+      margin: 0 0 12px;
+      color: var(--buddy-soft-ink);
+      line-height: 1.55;
+    }
+
+    .notebook-preview {
+      margin: 0;
+      max-height: 500px;
+      overflow: auto;
+      padding: 16px;
+      border-radius: 20px;
+      border: 1px solid rgba(39, 49, 50, 0.08);
+      background: rgba(255, 255, 255, 0.72);
+      color: #5f4b42;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 0.88rem;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .chat-shell {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-height: 720px;
+    }
+
+    .chat-log {
+      flex: 1;
+      min-height: 360px;
+      max-height: 480px;
+      overflow: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 16px;
+      border-radius: 22px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.74), rgba(255, 250, 245, 0.92)),
+        linear-gradient(135deg, rgba(142, 205, 178, 0.14), rgba(248, 212, 191, 0.22));
+      border: 1px solid rgba(39, 49, 50, 0.08);
+    }
+
+    .chat-empty {
+      padding: 14px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.74);
+      color: var(--buddy-soft-ink);
+      line-height: 1.65;
+    }
+
+    .chat-message {
+      max-width: 90%;
+      padding: 14px 16px;
+      border-radius: 22px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      word-break: break-word;
+      box-shadow: 0 8px 18px rgba(93, 69, 49, 0.08);
+    }
+
+    .chat-message--assistant {
+      align-self: flex-start;
+      background: white;
+      border-top-left-radius: 10px;
+    }
+
+    .chat-message--user {
+      align-self: flex-end;
+      color: white;
+      background: linear-gradient(135deg, #7aa9a7 0%, #6092a6 100%);
+      border-top-right-radius: 10px;
+    }
+
+    .chat-message__label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.74rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      opacity: 0.7;
+    }
+
+    .chat-status {
+      min-height: 1.2em;
+      color: #8a7064;
+      font-size: 0.92rem;
+      font-weight: 700;
+    }
+
+    .buddy-auth-note {
+      margin: 0;
+      color: #7c6e68;
+      font-size: 0.92rem;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 960px) {
+      .buddy-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .buddy-panel--tall {
+        grid-row: auto;
+      }
+
+      .chat-shell {
+        min-height: 0;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .buddy-shell {
+        padding: 18px 14px 44px;
+      }
+
+      .buddy-hero,
+      .buddy-panel {
+        border-radius: 24px;
+        padding: 18px;
+      }
+
+      .buddy-stat-grid,
+      .buddy-form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .panel-heading,
+      .buddy-actions,
+      .buddy-form-actions {
+        align-items: stretch;
+      }
+
+      .project-card__actions {
+        flex-direction: column;
+      }
+
+      .chat-message {
+        max-width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div data-rrc-auth></div>
+
+  <main class="buddy-shell">
+    <a class="buddy-back" href="../index.html">&larr; Back to roster</a>
+
+    <section class="buddy-hero">
+      <div class="buddy-sparkles" aria-hidden="true">
+        <span>🌼</span>
+        <span>🪴</span>
+        <span>✨</span>
+      </div>
+      <p class="buddy-kicker">Studio companion</p>
+      <h1>Studio Buddy</h1>
+      <p>Keep a few creative projects warm, log tiny wins, ask for critique when you actually want it, and let each conversation start fresh so the notebook holds the long arc instead of the loop.</p>
+
+      <div class="buddy-stat-grid">
+        <article class="buddy-stat">
+          <span class="buddy-stat__label">Daily streak</span>
+          <span class="buddy-stat__value" data-daily-streak>0</span>
+          <span class="buddy-stat__note" data-daily-note>Waiting for today's tiny update.</span>
+        </article>
+        <article class="buddy-stat">
+          <span class="buddy-stat__label">Weekly streak</span>
+          <span class="buddy-stat__value" data-weekly-streak>0</span>
+          <span class="buddy-stat__note" data-weekly-note>Weekly reflection wants a little love.</span>
+        </article>
+        <article class="buddy-stat">
+          <span class="buddy-stat__label">Projects warm</span>
+          <span class="buddy-stat__value" data-project-count>0</span>
+          <span class="buddy-stat__note" data-project-note>Nothing in orbit yet.</span>
+        </article>
+      </div>
+
+      <div class="buddy-banner">
+        <div class="buddy-pill" data-motto-pill>✨ Tiny progress still counts.</div>
+        <div class="buddy-pill" data-reminder-pill>🌤️ Daily check-in ready.</div>
+      </div>
+    </section>
+
+    <div class="buddy-grid">
+      <section class="buddy-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="panel-kicker">Project notebook</p>
+            <h2>Projects</h2>
+            <p>Keep a short memory for each project: why it matters, what is true right now, and what you want next.</p>
+          </div>
+          <button class="buddy-quiet-button" type="button" data-new-project>Fresh card</button>
+        </div>
+
+        <div class="project-list" data-project-list></div>
+
+        <form data-project-form>
+          <div class="buddy-form-grid">
+            <div class="buddy-field">
+              <label for="project-name">Project name</label>
+              <input id="project-name" name="project-name" type="text" placeholder="Glass animal zine">
+            </div>
+            <div class="buddy-field">
+              <label for="project-vibe">Project vibe</label>
+              <select id="project-vibe" name="project-vibe">
+                <option value="sunny">Sunny</option>
+                <option value="dreamy">Dreamy</option>
+                <option value="bold">Bold</option>
+                <option value="cozy">Cozy</option>
+                <option value="weird">Weird</option>
+              </select>
+            </div>
+            <div class="buddy-field buddy-field--full">
+              <label for="project-why">Why it matters</label>
+              <textarea id="project-why" name="project-why" placeholder="Why does this one deserve a place in your life?"></textarea>
+            </div>
+            <div class="buddy-field">
+              <label for="project-state">Current state</label>
+              <textarea id="project-state" name="project-state" placeholder="What have you done lately? What feels fragile or promising?"></textarea>
+            </div>
+            <div class="buddy-field">
+              <label for="project-next">Next move</label>
+              <textarea id="project-next" name="project-next" placeholder="One next step that would genuinely help."></textarea>
+            </div>
+            <div class="buddy-field buddy-field--full">
+              <label for="project-view">Personal view</label>
+              <textarea id="project-view" name="project-view" placeholder="How do you feel about this project over the long term?"></textarea>
+            </div>
+          </div>
+          <div class="buddy-form-actions">
+            <button class="buddy-primary" type="submit">Save project memory</button>
+            <span class="buddy-muted" data-project-status></span>
+          </div>
+        </form>
+      </section>
+
+      <section class="buddy-panel buddy-panel--tall">
+        <div class="panel-heading">
+          <div>
+            <p class="panel-kicker">Fresh conversation</p>
+            <h2>Buddy chat</h2>
+            <p>Chat sessions are intentionally temporary. The plain-text notebook stays; the back-and-forth does not.</p>
+          </div>
+          <button class="buddy-quiet-button" type="button" data-fresh-chat>Fresh chat</button>
+        </div>
+
+        <div class="chat-shell">
+          <div class="buddy-form-grid">
+            <div class="buddy-field">
+              <label for="chat-project">Project</label>
+              <select id="chat-project" data-chat-project></select>
+            </div>
+            <div class="buddy-field">
+              <label for="chat-mode">Mode</label>
+              <select id="chat-mode" data-chat-mode>
+                <option value="support">Support + next steps</option>
+                <option value="critique">Critique with encouragement bookends</option>
+                <option value="checkin">Check-in + streak coach</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="chat-log" data-chat-log></div>
+          <div class="chat-status" data-chat-status></div>
+
+          <form data-chat-form>
+            <div class="buddy-field">
+              <label for="chat-prompt">What do you want help with?</label>
+              <textarea id="chat-prompt" data-chat-prompt placeholder="Paste a paragraph, describe the stuck point, or ask for a gentle check-in."></textarea>
+            </div>
+            <div class="buddy-actions">
+              <button class="buddy-primary" type="submit" data-chat-submit>Ask Studio Buddy</button>
+              <p class="buddy-auth-note" data-rrc-auth-note></p>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section class="buddy-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="panel-kicker">Check-ins</p>
+            <h2>Streak garden</h2>
+            <p>Daily notes keep the flame alive. Weekly notes help you zoom out before things turn into mush.</p>
+          </div>
+        </div>
+
+        <div class="garden-strip">
+          <strong data-garden-label>Garden loading...</strong>
+          <span data-garden-strip aria-hidden="true">🌱</span>
+        </div>
+
+        <form data-checkin-form>
+          <div class="buddy-form-grid">
+            <div class="buddy-field">
+              <label for="checkin-type">Check-in type</label>
+              <select id="checkin-type" data-checkin-type>
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+              </select>
+            </div>
+            <div class="buddy-field">
+              <label for="checkin-project">Project</label>
+              <select id="checkin-project" data-checkin-project></select>
+            </div>
+            <div class="buddy-field buddy-field--full">
+              <label for="checkin-note">Note</label>
+              <textarea id="checkin-note" data-checkin-note placeholder="Tiny win, snag, mood, or what you want to remember next time."></textarea>
+            </div>
+          </div>
+          <div class="buddy-form-actions">
+            <button class="buddy-primary" type="submit">Save check-in</button>
+            <span class="buddy-muted" data-checkin-status></span>
+          </div>
+        </form>
+
+        <div class="entry-list" data-entry-list></div>
+      </section>
+
+      <section class="buddy-panel">
+        <div class="panel-heading">
+          <div>
+            <p class="panel-kicker">Plain-text memory</p>
+            <h2>Notebook preview</h2>
+            <p>Every saved project note and check-in is compiled into a plain-text notebook in local storage and used as the buddy's only long-term memory.</p>
+          </div>
+        </div>
+        <p class="notebook-note" data-storage-note></p>
+        <pre class="notebook-preview" data-notebook-preview></pre>
+      </section>
+    </div>
+  </main>
+
+  <script type="module">
+    import { initRobotShell } from '../shared/rrc-shell.js'
+    import { createChatCompletion, extractChatMessage } from '../shared/rrc-openrouter.js'
+    import { getAuthState, onAuthChange } from '../shared/rrc-auth.js'
+
+    initRobotShell()
+
+    const STORAGE_KEY = 'rrc:studio-buddy:state:v1'
+    const NOTEBOOK_KEY = 'rrc:studio-buddy:notebook:v1'
+    const MAX_DAILY_ENTRIES = 90
+    const MAX_WEEKLY_ENTRIES = 36
+
+    const VIBE_EMOJI = {
+      sunny: '🌞',
+      dreamy: '☁️',
+      bold: '🎺',
+      cozy: '🫖',
+      weird: '🪩',
+    }
+
+    const MOTTO_POOL = [
+      '✨ Tiny progress still counts as studio magic.',
+      '🌱 The kindest momentum is repeatable momentum.',
+      '🎈 You do not need a perfect mood to touch the work.',
+      '🪴 Fresh chats, steady notebook, fewer loops.',
+      '🌼 The project only needs your next real step, not a grand speech.',
+    ]
+
+    const storage = (() => {
+      try {
+        return window.localStorage
+      } catch (error) {
+        console.error('Local storage unavailable', error)
+        return null
+      }
+    })()
+
+    const elements = {
+      dailyStreak: document.querySelector('[data-daily-streak]'),
+      dailyNote: document.querySelector('[data-daily-note]'),
+      weeklyStreak: document.querySelector('[data-weekly-streak]'),
+      weeklyNote: document.querySelector('[data-weekly-note]'),
+      projectCount: document.querySelector('[data-project-count]'),
+      projectNote: document.querySelector('[data-project-note]'),
+      mottoPill: document.querySelector('[data-motto-pill]'),
+      reminderPill: document.querySelector('[data-reminder-pill]'),
+      projectList: document.querySelector('[data-project-list]'),
+      projectForm: document.querySelector('[data-project-form]'),
+      projectName: document.querySelector('#project-name'),
+      projectVibe: document.querySelector('#project-vibe'),
+      projectWhy: document.querySelector('#project-why'),
+      projectState: document.querySelector('#project-state'),
+      projectNext: document.querySelector('#project-next'),
+      projectView: document.querySelector('#project-view'),
+      projectStatus: document.querySelector('[data-project-status]'),
+      newProjectButton: document.querySelector('[data-new-project]'),
+      chatProject: document.querySelector('[data-chat-project]'),
+      chatMode: document.querySelector('[data-chat-mode]'),
+      chatLog: document.querySelector('[data-chat-log]'),
+      chatStatus: document.querySelector('[data-chat-status]'),
+      chatForm: document.querySelector('[data-chat-form]'),
+      chatPrompt: document.querySelector('[data-chat-prompt]'),
+      chatSubmit: document.querySelector('[data-chat-submit]'),
+      freshChatButton: document.querySelector('[data-fresh-chat]'),
+      authNote: document.querySelector('[data-rrc-auth-note]'),
+      checkinForm: document.querySelector('[data-checkin-form]'),
+      checkinType: document.querySelector('[data-checkin-type]'),
+      checkinProject: document.querySelector('[data-checkin-project]'),
+      checkinNote: document.querySelector('[data-checkin-note]'),
+      checkinStatus: document.querySelector('[data-checkin-status]'),
+      entryList: document.querySelector('[data-entry-list]'),
+      gardenLabel: document.querySelector('[data-garden-label]'),
+      gardenStrip: document.querySelector('[data-garden-strip]'),
+      notebookPreview: document.querySelector('[data-notebook-preview]'),
+      storageNote: document.querySelector('[data-storage-note]'),
+    }
+
+    const createEmptyState = () => ({
+      selectedProjectId: '',
+      projects: [],
+      dailyEntries: [],
+      weeklyEntries: [],
+    })
+
+    const compactText = (value) => String(value || '').replace(/\s+/g, ' ').trim()
+
+    const escapeHtml = (value) => String(value || '').replace(/[&<>"']/g, (character) => (
+      {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;',
+      }[character]
+    ))
+
+    const localDateKey = (date = new Date()) => {
+      const year = date.getFullYear()
+      const month = String(date.getMonth() + 1).padStart(2, '0')
+      const day = String(date.getDate()).padStart(2, '0')
+      return `${year}-${month}-${day}`
+    }
+
+    const parseDateKey = (key) => {
+      const [year, month, day] = String(key).split('-').map(Number)
+      return new Date(year, month - 1, day)
+    }
+
+    const stepDateKey = (key, days) => {
+      const date = parseDateKey(key)
+      date.setDate(date.getDate() + days)
+      return localDateKey(date)
+    }
+
+    const weekKeyFromDate = (date = new Date()) => {
+      const monday = new Date(date.getFullYear(), date.getMonth(), date.getDate())
+      const offset = (monday.getDay() + 6) % 7
+      monday.setDate(monday.getDate() - offset)
+      return localDateKey(monday)
+    }
+
+    const formatDateTime = (isoString) => {
+      const date = new Date(isoString)
+      return new Intl.DateTimeFormat(undefined, {
+        month: 'short',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: '2-digit',
+      }).format(date)
+    }
+
+    const formatDateShort = (key) => new Intl.DateTimeFormat(undefined, {
+      month: 'short',
+      day: 'numeric',
+    }).format(parseDateKey(key))
+
+    const uniqueSortedKeys = (items) => [...new Set(items)].sort()
+
+    const countConsecutiveStreak = (keys, stepBack) => {
+      const ordered = uniqueSortedKeys(keys)
+      if (!ordered.length) {
+        return 0
+      }
+
+      let streak = 1
+      let cursor = ordered[ordered.length - 1]
+      const available = new Set(ordered)
+
+      while (available.has(stepBack(cursor))) {
+        cursor = stepBack(cursor)
+        streak += 1
+      }
+
+      return streak
+    }
+
+    const loadState = () => {
+      if (!storage) {
+        return createEmptyState()
+      }
+
+      try {
+        const raw = storage.getItem(STORAGE_KEY)
+        if (!raw) {
+          return createEmptyState()
+        }
+
+        const parsed = JSON.parse(raw)
+        return {
+          selectedProjectId: parsed.selectedProjectId || '',
+          projects: Array.isArray(parsed.projects) ? parsed.projects : [],
+          dailyEntries: Array.isArray(parsed.dailyEntries) ? parsed.dailyEntries : [],
+          weeklyEntries: Array.isArray(parsed.weeklyEntries) ? parsed.weeklyEntries : [],
+        }
+      } catch (error) {
+        console.error('Failed to load Studio Buddy state', error)
+        return createEmptyState()
+      }
+    }
+
+    const getProjectById = (projectId) => state.projects.find((project) => project.id === projectId) || null
+
+    const selectedProject = () => getProjectById(state.selectedProjectId)
+
+    const summarizeProject = (project) => compactText(
+      project.currentState || project.nextStep || project.whyItMatters || project.personalView || 'New project card.'
+    )
+
+    const calculatePulse = (project) => {
+      const sevenDaysAgo = new Date()
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6)
+      const cutoff = sevenDaysAgo.getTime()
+
+      const recentCheckins = state.dailyEntries.filter((entry) => (
+        entry.projectId === project.id && new Date(entry.createdAt).getTime() >= cutoff
+      )).length
+
+      const filled = Math.max(
+        1,
+        Math.min(
+          5,
+          recentCheckins + Number(Boolean(compactText(project.currentState))) + Number(Boolean(compactText(project.nextStep)))
+        )
+      )
+
+      return Array.from({ length: 5 }, (_, index) => (
+        `<span class="pulse-dot ${index < filled ? 'is-on' : ''}"></span>`
+      )).join('')
+    }
+
+    const getDailyStats = () => {
+      const today = localDateKey()
+      const keys = state.dailyEntries.map((entry) => entry.localDate).filter(Boolean)
+      return {
+        streak: countConsecutiveStreak(keys, (key) => stepDateKey(key, -1)),
+        hasToday: keys.includes(today),
+        lastKey: uniqueSortedKeys(keys).at(-1) || '',
+      }
+    }
+
+    const getWeeklyStats = () => {
+      const thisWeek = weekKeyFromDate()
+      const keys = state.weeklyEntries.map((entry) => entry.weekKey).filter(Boolean)
+      return {
+        streak: countConsecutiveStreak(keys, (key) => stepDateKey(key, -7)),
+        hasThisWeek: keys.includes(thisWeek),
+        lastKey: uniqueSortedKeys(keys).at(-1) || '',
+      }
+    }
+
+    const buildReminderText = (dailyStats, weeklyStats) => {
+      if (!dailyStats.hasToday && !weeklyStats.hasThisWeek) {
+        return '🌤️ Daily note and weekly reflection are both waiting.'
+      }
+      if (!dailyStats.hasToday) {
+        return '🌤️ Daily check-in ready whenever you are.'
+      }
+      if (!weeklyStats.hasThisWeek) {
+        return '📓 Weekly reflection still wants a short visit.'
+      }
+      return '🎉 Notebook is current. You are tending the garden.'
+    }
+
+    const buildGarden = (dailyStreak, weeklyStreak) => {
+      const flowers = Array.from({ length: Math.max(1, Math.min(6, dailyStreak || 1)) }, (_, index) => (
+        dailyStreak > 0 ? ['🌱', '🌿', '🌼', '🌸', '🌻', '🌺'][Math.min(index, 5)] : '🫧'
+      )).join(' ')
+      const suns = Array.from({ length: Math.max(1, Math.min(4, weeklyStreak || 1)) }, (_, index) => (
+        weeklyStreak > 0 ? ['☀️', '🌤️', '🌈', '⭐'][Math.min(index, 3)] : '🌙'
+      )).join(' ')
+      return `${flowers} ${suns}`.trim()
+    }
+
+    const chooseMotto = () => {
+      const seed = state.projects.length + state.dailyEntries.length + state.weeklyEntries.length
+      return MOTTO_POOL[seed % MOTTO_POOL.length]
+    }
+
+    const compileNotebook = () => {
+      const lines = [
+        'Studio Buddy notebook',
+        `Updated: ${new Date().toLocaleString()}`,
+        '',
+        `Projects: ${state.projects.length}`,
+      ]
+
+      if (!state.projects.length) {
+        lines.push('- No projects saved yet.')
+      } else {
+        state.projects.forEach((project) => {
+          lines.push(`- ${project.name} (${project.vibe})`)
+          lines.push(`  Why it matters: ${compactText(project.whyItMatters) || 'n/a'}`)
+          lines.push(`  Current state: ${compactText(project.currentState) || 'n/a'}`)
+          lines.push(`  Next move: ${compactText(project.nextStep) || 'n/a'}`)
+          lines.push(`  Personal view: ${compactText(project.personalView) || 'n/a'}`)
+          lines.push(`  Last saved: ${project.updatedAt ? formatDateTime(project.updatedAt) : 'n/a'}`)
+          lines.push('')
+        })
+      }
+
+      lines.push('Daily check-ins:')
+      if (!state.dailyEntries.length) {
+        lines.push('- none yet')
+      } else {
+        state.dailyEntries
+          .slice()
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+          .slice(0, 12)
+          .forEach((entry) => {
+            const project = getProjectById(entry.projectId)
+            lines.push(`- ${entry.localDate} :: ${project ? project.name : 'general'} :: ${compactText(entry.note)}`)
+          })
+      }
+
+      lines.push('')
+      lines.push('Weekly reflections:')
+      if (!state.weeklyEntries.length) {
+        lines.push('- none yet')
+      } else {
+        state.weeklyEntries
+          .slice()
+          .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+          .slice(0, 8)
+          .forEach((entry) => {
+            const project = getProjectById(entry.projectId)
+            lines.push(`- week of ${entry.weekKey} :: ${project ? project.name : 'general'} :: ${compactText(entry.note)}`)
+          })
+      }
+
+      return lines.join('\n')
+    }
+
+    const persistState = () => {
+      const notebook = compileNotebook()
+
+      if (storage) {
+        try {
+          storage.setItem(STORAGE_KEY, JSON.stringify(state))
+          storage.setItem(NOTEBOOK_KEY, notebook)
+        } catch (error) {
+          console.error('Failed to persist Studio Buddy state', error)
+        }
+      }
+
+      elements.notebookPreview.textContent = notebook
+      return notebook
+    }
+
+    const fillProjectForm = (project) => {
+      elements.projectName.value = project?.name || ''
+      elements.projectVibe.value = project?.vibe || 'sunny'
+      elements.projectWhy.value = project?.whyItMatters || ''
+      elements.projectState.value = project?.currentState || ''
+      elements.projectNext.value = project?.nextStep || ''
+      elements.projectView.value = project?.personalView || ''
+    }
+
+    const renderProjectSelectOptions = () => {
+      const makeOptions = () => {
+        const options = ['<option value="">General studio life</option>']
+        state.projects.forEach((project) => {
+          options.push(`<option value="${escapeHtml(project.id)}">${escapeHtml(project.name)}</option>`)
+        })
+        return options.join('')
+      }
+
+      const selectedChatValue = elements.chatProject.value
+      const selectedCheckinValue = elements.checkinProject.value
+      elements.chatProject.innerHTML = makeOptions()
+      elements.checkinProject.innerHTML = makeOptions()
+
+      const fallbackId = state.selectedProjectId || ''
+      elements.chatProject.value = (selectedChatValue === '' || state.projects.some((project) => project.id === selectedChatValue))
+        ? selectedChatValue
+        : fallbackId
+      elements.checkinProject.value = (selectedCheckinValue === '' || state.projects.some((project) => project.id === selectedCheckinValue))
+        ? selectedCheckinValue
+        : fallbackId
+    }
+
+    const renderProjects = () => {
+      if (!state.projects.length) {
+        elements.projectList.innerHTML = `<div class="buddy-empty">No project cards yet. Start with one project you care about. A tiny, honest notebook beats an elaborate forgotten system.</div>`
+        return
+      }
+
+      elements.projectList.innerHTML = state.projects.map((project) => `
+        <article class="project-card ${project.id === state.selectedProjectId ? 'is-selected' : ''}">
+          <div class="project-card__top">
+            <div>
+              <div class="project-card__emoji">${VIBE_EMOJI[project.vibe] || '🌼'}</div>
+              <h3>${escapeHtml(project.name)}</h3>
+            </div>
+            <div class="project-card__meta">
+              <span>${escapeHtml(project.vibe)}</span>
+            </div>
+          </div>
+          <p class="project-card__summary">${escapeHtml(summarizeProject(project))}</p>
+          <div class="project-card__meta">
+            <span>Updated ${escapeHtml(project.updatedAt ? formatDateTime(project.updatedAt) : 'just now')}</span>
+          </div>
+          <div class="project-card__pulse" aria-hidden="true">${calculatePulse(project)}</div>
+          <div class="project-card__actions">
+            <button class="buddy-secondary" type="button" data-project-select="${escapeHtml(project.id)}">Edit</button>
+            <button class="buddy-quiet-button" type="button" data-project-delete="${escapeHtml(project.id)}">Delete</button>
+          </div>
+        </article>
+      `).join('')
+    }
+
+    const renderEntries = () => {
+      const combined = [
+        ...state.dailyEntries.map((entry) => ({ ...entry, kind: 'daily' })),
+        ...state.weeklyEntries.map((entry) => ({ ...entry, kind: 'weekly' })),
+      ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, 6)
+
+      if (!combined.length) {
+        elements.entryList.innerHTML = `<div class="buddy-empty">No check-ins yet. Add a daily note when you touch the work, or a weekly note when you want to reset the story.</div>`
+        return
+      }
+
+      elements.entryList.innerHTML = combined.map((entry) => {
+        const project = getProjectById(entry.projectId)
+        return `
+          <article class="entry-card">
+            <div class="entry-card__badge">${entry.kind === 'daily' ? '🌤️' : '🗓️'}</div>
+            <div>
+              <div class="entry-card__meta">${entry.kind === 'daily' ? 'Daily' : 'Weekly'} · ${escapeHtml(project ? project.name : 'general')} · ${escapeHtml(formatDateTime(entry.createdAt))}</div>
+              <div class="entry-card__text">${escapeHtml(entry.note)}</div>
+            </div>
+          </article>
+        `
+      }).join('')
+    }
+
+    const renderStats = () => {
+      const dailyStats = getDailyStats()
+      const weeklyStats = getWeeklyStats()
+      const projectCount = state.projects.length
+      const notebookReminder = buildReminderText(dailyStats, weeklyStats)
+
+      elements.dailyStreak.textContent = String(dailyStats.streak)
+      elements.dailyNote.textContent = dailyStats.hasToday
+        ? 'Today is logged. Nice.'
+        : dailyStats.lastKey
+          ? `Last daily note: ${formatDateShort(dailyStats.lastKey)}`
+          : "Waiting for today's tiny update."
+      elements.weeklyStreak.textContent = String(weeklyStats.streak)
+      elements.weeklyNote.textContent = weeklyStats.hasThisWeek
+        ? 'This week already has a reflection.'
+        : weeklyStats.lastKey
+          ? `Last weekly note: week of ${formatDateShort(weeklyStats.lastKey)}`
+          : 'Weekly reflection wants a little love.'
+      elements.projectCount.textContent = String(projectCount)
+      elements.projectNote.textContent = projectCount
+        ? `${projectCount === 1 ? '1 project is' : `${projectCount} projects are`} in orbit.`
+        : 'Nothing in orbit yet.'
+      elements.mottoPill.textContent = chooseMotto()
+      elements.reminderPill.textContent = notebookReminder
+      elements.gardenLabel.textContent = `Daily ${dailyStats.streak} · Weekly ${weeklyStats.streak}`
+      elements.gardenStrip.textContent = buildGarden(dailyStats.streak, weeklyStats.streak)
+    }
+
+    const renderChat = () => {
+      elements.chatLog.innerHTML = ''
+
+      if (!chatSession.length) {
+        const empty = document.createElement('div')
+        empty.className = 'chat-empty'
+        empty.textContent = 'Fresh chat loaded. The notebook is available, but older conversations are intentionally gone. Ask for support, critique, or a check-in. 🌼'
+        elements.chatLog.appendChild(empty)
+        return
+      }
+
+      chatSession.forEach((message) => {
+        const bubble = document.createElement('div')
+        bubble.className = `chat-message chat-message--${message.role === 'assistant' ? 'assistant' : 'user'}`
+
+        const label = document.createElement('span')
+        label.className = 'chat-message__label'
+        label.textContent = message.role === 'assistant' ? 'Studio Buddy' : 'You'
+
+        const body = document.createElement('div')
+        body.textContent = message.content
+
+        bubble.appendChild(label)
+        bubble.appendChild(body)
+        elements.chatLog.appendChild(bubble)
+      })
+
+      elements.chatLog.scrollTop = elements.chatLog.scrollHeight
+    }
+
+    const renderStorageNote = () => {
+      elements.storageNote.textContent = storage
+        ? `Saved to localStorage keys "${STORAGE_KEY}" and "${NOTEBOOK_KEY}".`
+        : 'Local storage is unavailable in this browser, so the notebook will only last for this visit.'
+    }
+
+    const renderAll = () => {
+      renderProjectSelectOptions()
+      renderProjects()
+      renderEntries()
+      renderStats()
+      renderChat()
+      renderStorageNote()
+      persistState()
+    }
+
+    const resetProjectForm = () => {
+      state.selectedProjectId = ''
+      fillProjectForm(null)
+      renderAll()
+      elements.projectStatus.textContent = 'Fresh project card ready.'
+    }
+
+    const refreshAuthState = (authState) => {
+      if (authState.status === 'authorized') {
+        elements.chatSubmit.disabled = false
+        elements.authNote.textContent = 'OpenRouter connected. Buddy chat is ready.'
+      } else if (authState.status === 'authorizing') {
+        elements.chatSubmit.disabled = true
+        elements.authNote.textContent = 'Connecting to OpenRouter...'
+      } else if (authState.status === 'error') {
+        elements.chatSubmit.disabled = true
+        elements.authNote.textContent = 'Auth error. Use the bar above to reconnect.'
+      } else {
+        elements.chatSubmit.disabled = true
+        elements.authNote.textContent = 'Connect OpenRouter above to talk with the buddy. Local tracking still works.'
+      }
+    }
+
+    const buildSystemPrompt = (mode, project, notebook) => {
+      const dailyStats = getDailyStats()
+      const weeklyStats = getWeeklyStats()
+      const modeGuidance = {
+        support: 'Lead with warmth, then offer 2 or 3 concrete next steps. Focus on momentum, clarity, and sustainable effort.',
+        critique: 'Begin with 1 or 2 sentences of specific long-term encouragement. Then give honest critique with concrete changes. End with 1 or 2 sentences of hopeful long-term encouragement. Do not water down real problems.',
+        checkin: 'Act like a caring check-in buddy. Reflect patterns, notice streaks, and help the user choose a manageable next move. Ask at most one follow-up question only if it would genuinely help.',
+      }
+
+      return [
+        'You are Studio Buddy, a supportive companion for creative work over time.',
+        'Long-term memory rules:',
+        '- The notebook below is your only long-term memory.',
+        '- Each chat session starts fresh on purpose.',
+        '- Do not claim to remember old conversations unless the notebook explicitly says so.',
+        'Tone rules:',
+        '- Warm, concise, specific, and lightly playful.',
+        '- Encourage consistency over heroic burnout.',
+        '- Use short paragraphs. Bullets are okay when useful.',
+        '- Use at most 3 emojis.',
+        `Mode guidance: ${modeGuidance[mode] || modeGuidance.support}`,
+        `Current dashboard: daily streak ${dailyStats.streak}, weekly streak ${weeklyStats.streak}.`,
+        `Selected project: ${project ? project.name : 'General studio life'}.`,
+        'Notebook:',
+        notebook,
+      ].join('\n')
+    }
+
+    let state = loadState()
+    let chatSession = []
+
+    fillProjectForm(selectedProject())
+    renderAll()
+    refreshAuthState(getAuthState())
+    onAuthChange(refreshAuthState)
+
+    elements.projectList.addEventListener('click', (event) => {
+      const target = event.target
+      if (!(target instanceof HTMLElement)) {
+        return
+      }
+
+      const selectId = target.getAttribute('data-project-select')
+      if (selectId) {
+        state.selectedProjectId = selectId
+        fillProjectForm(selectedProject())
+        renderAll()
+        elements.projectStatus.textContent = 'Project card loaded.'
+        return
+      }
+
+      const deleteId = target.getAttribute('data-project-delete')
+      if (!deleteId) {
+        return
+      }
+
+      const project = getProjectById(deleteId)
+      const okay = window.confirm(`Delete "${project ? project.name : 'this project'}" and its associated check-ins?`)
+      if (!okay) {
+        return
+      }
+
+      state.projects = state.projects.filter((item) => item.id !== deleteId)
+      state.dailyEntries = state.dailyEntries.filter((entry) => entry.projectId !== deleteId)
+      state.weeklyEntries = state.weeklyEntries.filter((entry) => entry.projectId !== deleteId)
+      if (state.selectedProjectId === deleteId) {
+        state.selectedProjectId = state.projects[0]?.id || ''
+      }
+      fillProjectForm(selectedProject())
+      renderAll()
+      elements.projectStatus.textContent = 'Project deleted.'
+    })
+
+    elements.newProjectButton.addEventListener('click', () => {
+      resetProjectForm()
+    })
+
+    elements.projectForm.addEventListener('submit', (event) => {
+      event.preventDefault()
+
+      const name = elements.projectName.value.trim()
+      if (!name) {
+        elements.projectStatus.textContent = 'Project name required.'
+        return
+      }
+
+      const now = new Date().toISOString()
+      const payload = {
+        id: state.selectedProjectId || `project-${Date.now()}`,
+        name,
+        vibe: elements.projectVibe.value,
+        whyItMatters: elements.projectWhy.value.trim(),
+        currentState: elements.projectState.value.trim(),
+        nextStep: elements.projectNext.value.trim(),
+        personalView: elements.projectView.value.trim(),
+        updatedAt: now,
+      }
+
+      const existingIndex = state.projects.findIndex((project) => project.id === payload.id)
+      if (existingIndex >= 0) {
+        state.projects[existingIndex] = payload
+      } else {
+        state.projects.unshift(payload)
+      }
+
+      state.selectedProjectId = payload.id
+      fillProjectForm(payload)
+      renderAll()
+      elements.projectStatus.textContent = 'Project memory saved.'
+    })
+
+    elements.checkinForm.addEventListener('submit', (event) => {
+      event.preventDefault()
+
+      const note = elements.checkinNote.value.trim()
+      if (!note) {
+        elements.checkinStatus.textContent = 'Write a note first.'
+        return
+      }
+
+      const now = new Date()
+      const kind = elements.checkinType.value
+      const entry = {
+        id: `${kind}-${Date.now()}`,
+        projectId: elements.checkinProject.value,
+        note,
+        createdAt: now.toISOString(),
+      }
+
+      if (kind === 'daily') {
+        state.dailyEntries.unshift({
+          ...entry,
+          localDate: localDateKey(now),
+        })
+        state.dailyEntries = state.dailyEntries.slice(0, MAX_DAILY_ENTRIES)
+      } else {
+        state.weeklyEntries.unshift({
+          ...entry,
+          weekKey: weekKeyFromDate(now),
+        })
+        state.weeklyEntries = state.weeklyEntries.slice(0, MAX_WEEKLY_ENTRIES)
+      }
+
+      elements.checkinNote.value = ''
+      renderAll()
+      elements.checkinStatus.textContent = `${kind === 'daily' ? 'Daily' : 'Weekly'} check-in saved.`
+    })
+
+    elements.freshChatButton.addEventListener('click', () => {
+      chatSession = []
+      renderChat()
+      elements.chatStatus.textContent = 'Fresh chat started. Notebook memory stays; old loops do not.'
+      elements.chatPrompt.focus()
+    })
+
+    elements.chatForm.addEventListener('submit', async (event) => {
+      event.preventDefault()
+
+      const prompt = elements.chatPrompt.value.trim()
+      if (!prompt) {
+        elements.chatStatus.textContent = 'Write a prompt for the buddy first.'
+        return
+      }
+
+      const authState = getAuthState()
+      if (authState.status !== 'authorized') {
+        refreshAuthState(authState)
+        elements.chatStatus.textContent = 'Buddy chat needs OpenRouter auth.'
+        return
+      }
+
+      const mode = elements.chatMode.value
+      const project = getProjectById(elements.chatProject.value)
+      const notebook = persistState()
+      const promptBody = [
+        `Mode: ${mode}`,
+        `Project: ${project ? project.name : 'General studio life'}`,
+        project ? `Project snapshot: ${compactText([project.whyItMatters, project.currentState, project.nextStep, project.personalView].filter(Boolean).join(' | '))}` : '',
+        'User request:',
+        prompt,
+      ].filter(Boolean).join('\n')
+      const historyForModel = chatSession.slice(-6).map((message) => ({
+        role: message.role,
+        content: message.content,
+      }))
+
+      chatSession.push({ role: 'user', content: prompt })
+      renderChat()
+      elements.chatStatus.textContent = 'Studio Buddy is thinking...'
+      elements.chatSubmit.disabled = true
+
+      try {
+        const response = await createChatCompletion({
+          model: 'openrouter/auto',
+          messages: [
+            { role: 'system', content: buildSystemPrompt(mode, project, notebook) },
+            ...historyForModel,
+            { role: 'user', content: promptBody },
+          ],
+          max_output_tokens: 320,
+          temperature: 0.88,
+        })
+
+        const message = extractChatMessage(response) || 'No response returned.'
+        chatSession.push({ role: 'assistant', content: message })
+        renderChat()
+        elements.chatStatus.textContent = 'Fresh reply delivered.'
+        elements.chatPrompt.value = ''
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unexpected error.'
+        elements.chatStatus.textContent = message
+      } finally {
+        refreshAuthState(getAuthState())
+      }
+    })
+  </script>
+</body>
+</html>

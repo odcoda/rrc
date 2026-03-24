@@ -1,3 +1,9 @@
+## 2026-03-24 add studio buddy robot
+built a new creative support robot page:
+- added studio-buddy.html with local project memory, plain-text notebook preview, streak tracking, and fresh-session buddy chat
+- wired the robot into the roster
+- kept auth gating on LLM chat while leaving local tracking usable without auth
+
 ## 2026-01-14 fix empathy game integration
 rewrote empathy-game.html to use shared RRC modules:
 - now uses shared auth (rrc:openrouter:tokens) instead of separate auth
