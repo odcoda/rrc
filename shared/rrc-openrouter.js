@@ -25,14 +25,14 @@ const buildHeaders = (tokens, config, init = {}) => {
   return headers
 }
 
-export const createChatCompletion = async (body) => {
+const createCompletion = async (path, body) => {
   const tokens = getTokens()
   if (!tokens) {
     throw new Error('OpenRouter tokens are not available. Connect first.')
   }
 
   const config = getOpenRouterConfig()
-  const response = await fetch(`${API_BASE_URL}/chat/completions`, {
+  const response = await fetch(`${API_BASE_URL}/${path}`, {
     method: 'POST',
     headers: buildHeaders(tokens, config),
     body: JSON.stringify(body),
@@ -50,6 +50,10 @@ export const createChatCompletion = async (body) => {
 
   return response.json()
 }
+
+export const createChatCompletion = async (body) => createCompletion('chat/completions', body)
+
+export const createTextCompletion = async (body) => createCompletion('completions', body)
 
 export const listModels = async () => {
   const tokens = getTokens()
@@ -75,10 +79,12 @@ export const listModels = async () => {
   return response.json()
 }
 
-export const extractChatMessage = (response) => {
+export const extractCompletionText = (response) => {
   if (!response || !response.choices || !response.choices.length) {
     return ''
   }
 
-  return (response.choices[0].message?.content || '').trim()
+  return (response.choices[0].message?.content || response.choices[0].text || '').trim()
 }
+
+export const extractChatMessage = extractCompletionText

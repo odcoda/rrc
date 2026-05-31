@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Story Extender - Robot Roll Call</title>
+  <link rel="stylesheet" href="../assets/rrc.css">
+  <style>
+    :root {
+      --story-ink: #33251f;
+      --story-soft: #6f5a4f;
+      --story-paper: #fffdf8;
+      --story-paper-dark: #f6eddf;
+      --story-line: rgba(104, 76, 60, 0.18);
+      --story-accent: #9b4f38;
+      --story-accent-dark: #713826;
+      --story-green: #3d6959;
+      --story-shadow: 0 18px 44px rgba(75, 49, 37, 0.14);
+    }
+
+    body {
+      color: var(--story-ink);
+      background:
+        radial-gradient(circle at 12% 12%, rgba(180, 133, 94, 0.18), transparent 30%),
+        radial-gradient(circle at 82% 8%, rgba(87, 119, 99, 0.16), transparent 26%),
+        #f4eee5 !important;
+    }
+
+    .story-shell {
+      width: min(920px, 92vw);
+      margin: 0 auto;
+      padding: 30px 0 72px;
+    }
+
+    .story-back {
+      color: var(--story-accent-dark);
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .story-back:hover {
+      text-decoration: underline;
+    }
+
+    .story-card {
+      margin-top: 18px;
+      padding: 28px;
+      border: 1px solid var(--story-line);
+      border-radius: 18px;
+      background: var(--story-paper);
+      box-shadow: var(--story-shadow);
+    }
+
+    .story-header {
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--story-line);
+    }
+
+    .story-kicker {
+      margin: 0 0 8px;
+      color: var(--story-green);
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2 {
+      font-family: 'Fraunces', Georgia, serif;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.35rem, 7vw, 4.2rem);
+      line-height: 0.98;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.35rem;
+    }
+
+    .story-header p,
+    .story-note,
+    .story-status {
+      color: var(--story-soft);
+      line-height: 1.55;
+    }
+
+    .story-header p {
+      max-width: 720px;
+      margin: 12px 0 0;
+    }
+
+    .story-form {
+      display: grid;
+      gap: 20px;
+      margin-top: 22px;
+    }
+
+    .story-field {
+      display: grid;
+      gap: 8px;
+    }
+
+    .story-field label {
+      color: var(--story-soft);
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .story-tags-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+    }
+
+    .story-prefix {
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      border: 1px solid var(--story-line);
+      border-radius: 10px;
+      background: #fff;
+    }
+
+    .story-prefix span {
+      padding-left: 12px;
+      color: var(--story-accent-dark);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+      font-weight: 600;
+    }
+
+    .story-prefix input {
+      flex: 1;
+      min-width: 0;
+      border: 0;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid var(--story-line);
+      border-radius: 10px;
+      color: var(--story-ink);
+      background: #fff;
+      font: inherit;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: 2px solid rgba(155, 79, 56, 0.26);
+      outline-offset: 1px;
+    }
+
+    textarea {
+      min-height: 240px;
+      resize: vertical;
+      line-height: 1.6;
+    }
+
+    .story-button {
+      border: 0;
+      border-radius: 999px;
+      padding: 11px 17px;
+      color: #fff;
+      background: var(--story-accent);
+      cursor: pointer;
+      font: inherit;
+      font-size: 0.88rem;
+      font-weight: 700;
+      transition: background 0.16s ease, transform 0.16s ease;
+    }
+
+    .story-button:hover:not(:disabled) {
+      transform: translateY(-1px);
+      background: var(--story-accent-dark);
+    }
+
+    .story-button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
+
+    .story-button.secondary {
+      color: var(--story-accent-dark);
+      border: 1px solid rgba(155, 79, 56, 0.32);
+      background: #fff8f2;
+    }
+
+    .story-button.secondary:hover:not(:disabled) {
+      background: #f7e8dd;
+    }
+
+    .story-actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .story-note,
+    .story-status {
+      margin: 0;
+      font-size: 0.84rem;
+    }
+
+    .story-model-note {
+      padding: 11px 13px;
+      border-radius: 10px;
+      color: var(--story-soft);
+      background: var(--story-paper-dark);
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+
+    .story-output {
+      min-height: 160px;
+      margin-top: 14px;
+      padding: 18px;
+      border: 1px solid var(--story-line);
+      border-radius: 12px;
+      color: var(--story-ink);
+      background: #fff;
+      font-family: Georgia, serif;
+      font-size: 1.04rem;
+      line-height: 1.7;
+      white-space: pre-wrap;
+    }
+
+    .story-output.is-loading::after {
+      content: '...';
+      color: var(--story-accent);
+      animation: story-pulse 1s ease-in-out infinite;
+    }
+
+    @keyframes story-pulse {
+      0%, 100% { opacity: 0.25; }
+      50% { opacity: 1; }
+    }
+
+    @media (max-width: 640px) {
+      .story-card {
+        padding: 20px;
+      }
+
+      .story-tags-row {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div data-rrc-auth></div>
+
+  <main class="story-shell">
+    <a class="story-back" href="../index.html">Back to roster</a>
+
+    <section class="story-card">
+      <header class="story-header">
+        <p class="story-kicker">Plain text continuation</p>
+        <h1>Story Extender</h1>
+        <p>Add tags, paste the story so far, and ask an open-weight continuation model for the next passage.</p>
+      </header>
+
+      <form class="story-form" data-story-form>
+        <div class="story-field">
+          <label for="tags">Tags</label>
+          <div class="story-tags-row">
+            <div class="story-prefix">
+              <span>tags:</span>
+              <input id="tags" name="tags" type="text" value="midnight, lantern, crossroads">
+            </div>
+            <button class="story-button secondary" type="button" data-random-tags>Random tags</button>
+          </div>
+          <p class="story-note">The generator overwrites this field. Edit any words by hand afterward.</p>
+        </div>
+
+        <div class="story-field">
+          <label for="model">Continuation model</label>
+          <select id="model" name="model">
+            <option value="aion-labs/aion-rp-llama-3.1-8b">Aion-RP 1.0 8B - base tune - $0.80 / $1.60 per M</option>
+            <option value="thedrummer/rocinante-12b">Rocinante 12B - writing tune - $0.17 / $0.43 per M</option>
+            <option value="thedrummer/unslopnemo-12b">UnslopNemo 12B - writing tune - $0.40 / $0.40 per M</option>
+          </select>
+          <div class="story-model-note" data-model-note></div>
+        </div>
+
+        <div class="story-field">
+          <label for="story">Story so far</label>
+          <textarea id="story" name="story" placeholder="Paste or write the story so far."></textarea>
+        </div>
+
+        <div class="story-actions">
+          <button class="story-button" type="submit" data-story-submit>Extend story</button>
+          <p class="story-status" data-story-auth-note></p>
+        </div>
+      </form>
+    </section>
+
+    <section class="story-card">
+      <h2>Continuation</h2>
+      <div class="story-output" data-story-output>The next passage will appear here.</div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initRobotShell } from '../shared/rrc-shell.js'
+    import { createTextCompletion, extractCompletionText } from '../shared/rrc-openrouter.js'
+    import { getAuthState, onAuthChange } from '../shared/rrc-auth.js'
+
+    initRobotShell({
+      copy: {
+        title: 'Story Extender',
+        subtitle: 'Connect OpenRouter, then continue a draft from plain text.',
+      },
+      theme: {
+        background: 'rgba(255, 253, 248, 0.94)',
+        borderColor: 'rgba(104, 76, 60, 0.18)',
+        textColor: '#33251f',
+        mutedTextColor: '#6f5a4f',
+        buttonBackground: '#9b4f38',
+        buttonHoverBackground: '#713826',
+        ghostTextColor: '#713826',
+        ghostBorderColor: 'rgba(155, 79, 56, 0.34)',
+        ghostHoverBackground: 'rgba(155, 79, 56, 0.1)',
+        errorColor: '#9b4f38',
+        statusColors: {
+          authorized: '#3d6959',
+          authorizing: '#a9793e',
+          error: '#9b4f38',
+          'signed-out': '#b9aea4',
+        },
+      },
+    })
+
+    const MAX_TOKENS = 320
+    const RANDOM_TAG_COUNT = 5
+    const RANDOM_TAGS = [
+      'afterglow', 'ancient', 'archive', 'bargain', 'candlelight', 'compass',
+      'crossroads', 'deserted', 'drifting', 'emerald', 'festival', 'fireplace',
+      'forgotten', 'fragment', 'gardenia', 'harvest', 'horizon', 'lantern',
+      'meadowland', 'midnight', 'mountain', 'mystery', 'orchard', 'passage',
+      'portrait', 'rainfall', 'reckoning', 'riverbank', 'sapphire', 'seashell',
+      'shadowed', 'silence', 'starlight', 'station', 'thunder', 'trembling',
+      'undertow', 'velvet', 'whisper', 'wilderness', 'woodland', 'workshop',
+      'yearning', 'zephyr',
+    ]
+    const MODEL_NOTES = {
+      'aion-labs/aion-rp-llama-3.1-8b': 'Default: OpenRouter describes Aion-RP as a fine-tuned base model rather than an instruct model. Its weights are published under Apache 2.0. Input $0.80/M, output $1.60/M.',
+      'thedrummer/rocinante-12b': 'Low-cost alternative tuned for storytelling and rich prose. Open weights are available. Input $0.17/M, output $0.43/M.',
+      'thedrummer/unslopnemo-12b': 'Low-cost alternative designed for adventure writing and role-play. Open weights are available. Input $0.40/M, output $0.40/M.',
+    }
+
+    const form = document.querySelector('[data-story-form]')
+    const submitButton = document.querySelector('[data-story-submit]')
+    const randomTagsButton = document.querySelector('[data-random-tags]')
+    const tagsField = document.querySelector('#tags')
+    const modelField = document.querySelector('#model')
+    const storyField = document.querySelector('#story')
+    const modelNote = document.querySelector('[data-model-note]')
+    const authNote = document.querySelector('[data-story-auth-note]')
+    const output = document.querySelector('[data-story-output]')
+    let isRunning = false
+
+    const updateModelNote = () => {
+      modelNote.textContent = MODEL_NOTES[modelField.value] || ''
+    }
+
+    const updateAuthNote = (state) => {
+      if (state.status === 'authorized') {
+        submitButton.disabled = isRunning
+        authNote.textContent = isRunning
+          ? `Generating up to ${MAX_TOKENS} tokens.`
+          : `OpenRouter connected. Continuations stop at ${MAX_TOKENS} tokens.`
+      } else if (state.status === 'authorizing') {
+        submitButton.disabled = true
+        authNote.textContent = 'Connecting to OpenRouter...'
+      } else if (state.status === 'error') {
+        submitButton.disabled = true
+        authNote.textContent = 'OpenRouter auth error. Reconnect with the top bar.'
+      } else {
+        submitButton.disabled = true
+        authNote.textContent = 'Connect OpenRouter with the top bar to extend a story.'
+      }
+    }
+
+    const pickRandomTags = () => {
+      const remaining = [...RANDOM_TAGS]
+      const chosen = []
+
+      while (chosen.length < RANDOM_TAG_COUNT) {
+        const index = Math.floor(Math.random() * remaining.length)
+        chosen.push(remaining.splice(index, 1)[0])
+      }
+
+      tagsField.value = chosen.join(', ')
+    }
+
+    updateModelNote()
+    updateAuthNote(getAuthState())
+    onAuthChange(updateAuthNote)
+
+    modelField.addEventListener('change', updateModelNote)
+    randomTagsButton.addEventListener('click', pickRandomTags)
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault()
+
+      const tags = tagsField.value.trim()
+      const story = storyField.value.trim()
+      if (!tags || !story) {
+        output.textContent = 'Add tags and a story before extending it.'
+        return
+      }
+
+      isRunning = true
+      output.textContent = 'Extending'
+      output.classList.add('is-loading')
+      updateAuthNote(getAuthState())
+
+      try {
+        const response = await createTextCompletion({
+          model: modelField.value,
+          prompt: `tags: ${tags}\nstory: ${story}`,
+          max_tokens: MAX_TOKENS,
+          temperature: 0.9,
+          top_p: 0.95,
+        })
+
+        const continuation = extractCompletionText(response)
+        output.textContent = continuation || 'No continuation returned.'
+      } catch (error) {
+        output.textContent = error instanceof Error ? error.message : 'Unexpected error.'
+      } finally {
+        isRunning = false
+        output.classList.remove('is-loading')
+        updateAuthNote(getAuthState())
+      }
+    })
+  </script>
+</body>
+</html>

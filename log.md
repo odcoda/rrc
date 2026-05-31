@@ -1,3 +1,9 @@
+## 2026-05-31 add story extender robot
+added a plain story continuation page:
+- sends editable tags and story text as one raw completion prompt with a 320-token cap
+- offers random tags and a small set of low-cost open-weight continuation models
+- added shared raw text-completion support and linked the robot from the roster
+
 ## 2026-05-30 customizable auth bar themes
 made the shared auth bar configurable per robot without duplicating markup:
 - added `initRobotShell({ copy, theme })` options for text, fonts, colors, buttons, and status dots
