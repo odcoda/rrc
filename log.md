@@ -1,3 +1,9 @@
+## 2026-05-31 handle private browser auth storage
+hardened shared OpenRouter auth persistence:
+- verify browser storage before starting PKCE sign-in
+- fall back to per-tab session storage when local storage is blocked
+- show an actionable error instead of claiming a failed token save worked
+
 ## 2026-05-31 add free story model alternatives
 expanded the story extender dropdown:
 - added free Venice Uncensored, gpt-oss-20b, and Gemma 4 26B options

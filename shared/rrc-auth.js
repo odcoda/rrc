@@ -6,17 +6,25 @@ const TOKEN_URL = 'https://openrouter.ai/api/v1/auth/keys'
 
 const TOKEN_STORAGE_KEY = 'rrc:openrouter:tokens'
 const PKCE_STORAGE_KEY = 'rrc:openrouter:pkce'
+const STORAGE_TEST_KEY = 'rrc:storage:test'
+const STORAGE_ERROR = 'Unable to save your OpenRouter connection. Browser storage may be disabled or private; use a regular browser tab.'
 
 const listeners = new Set()
 let lastError = ''
 
 const safeStorage = () => {
-  try {
-    return window.localStorage
-  } catch (error) {
-    console.error('Local storage unavailable', error)
-    return null
+  for (const candidate of ['localStorage', 'sessionStorage']) {
+    try {
+      const storage = window[candidate]
+      storage.setItem(STORAGE_TEST_KEY, '1')
+      storage.removeItem(STORAGE_TEST_KEY)
+      return storage
+    } catch (error) {
+      console.warn(`${candidate} unavailable`, error)
+    }
   }
+
+  return null
 }
 
 const storage = safeStorage()
@@ -44,25 +52,29 @@ const notify = () => {
 
 const writeTokens = (tokens) => {
   if (!storage) {
-    return
+    return false
   }
 
   try {
     storage.setItem(TOKEN_STORAGE_KEY, JSON.stringify(tokens))
+    return true
   } catch (error) {
     console.error('Failed to save OpenRouter tokens', error)
+    return false
   }
 }
 
 const savePkceSession = (session) => {
   if (!storage) {
-    return
+    return false
   }
 
   try {
     storage.setItem(PKCE_STORAGE_KEY, JSON.stringify(session))
+    return true
   } catch (error) {
     console.error('Failed to persist PKCE session', error)
+    return false
   }
 }
 
@@ -200,10 +212,15 @@ export const clearTokens = () => {
 }
 
 export const setTokens = (tokens) => {
-  writeTokens(tokens)
+  if (!writeTokens(tokens)) {
+    setAuthError(STORAGE_ERROR)
+    return false
+  }
+
   currentStatus = 'authorized'
   lastError = ''
   notify()
+  return true
 }
 
 export const setAuthError = (message) => {
@@ -230,11 +247,14 @@ export const createAuthorizationUrl = async (options = {}) => {
   const codeVerifier = generateCodeVerifier()
   const codeChallenge = await generateCodeChallenge(codeVerifier)
 
-  savePkceSession({
+  const saved = savePkceSession({
     state,
     codeVerifier,
     createdAt: Date.now(),
   })
+  if (!saved) {
+    throw new Error(STORAGE_ERROR)
+  }
 
   const useClientFlow = Boolean(config.clientId)
   const url = new URL(useClientFlow ? AUTHORIZE_URL : AUTH_URL)
@@ -348,8 +368,14 @@ export const startAuthorization = async () => {
   lastError = ''
   notify()
 
-  const { url } = await createAuthorizationUrl()
-  window.location.assign(url)
+  try {
+    const { url } = await createAuthorizationUrl()
+    window.location.assign(url)
+  } catch (error) {
+    const message = error instanceof Error ? error.message : STORAGE_ERROR
+    setAuthError(message)
+    throw error
+  }
 }
 
 export const getTokens = () => readTokens()
