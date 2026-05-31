@@ -285,9 +285,16 @@
         <div class="story-field">
           <label for="model">Continuation model</label>
           <select id="model" name="model">
-            <option value="aion-labs/aion-rp-llama-3.1-8b">Aion-RP 1.0 8B - base tune - $0.80 / $1.60 per M</option>
-            <option value="thedrummer/rocinante-12b">Rocinante 12B - writing tune - $0.17 / $0.43 per M</option>
-            <option value="thedrummer/unslopnemo-12b">UnslopNemo 12B - writing tune - $0.40 / $0.40 per M</option>
+            <optgroup label="Cheap continuation models">
+              <option value="aion-labs/aion-rp-llama-3.1-8b">Aion-RP 1.0 8B - base tune - $0.80 / $1.60 per M</option>
+              <option value="thedrummer/rocinante-12b">Rocinante 12B - writing tune - $0.17 / $0.43 per M</option>
+              <option value="thedrummer/unslopnemo-12b">UnslopNemo 12B - writing tune - $0.40 / $0.40 per M</option>
+            </optgroup>
+            <optgroup label="Free open-weight alternatives">
+              <option value="cognitivecomputations/dolphin-mistral-24b-venice-edition:free">Venice Uncensored 24B - free writing tune</option>
+              <option value="openai/gpt-oss-20b:free">gpt-oss-20b - free Apache 2.0 fallback</option>
+              <option value="google/gemma-4-26b-a4b-it:free">Gemma 4 26B A4B IT - free instruct fallback</option>
+            </optgroup>
           </select>
           <div class="story-model-note" data-model-note></div>
         </div>
@@ -356,6 +363,9 @@
       'aion-labs/aion-rp-llama-3.1-8b': 'Default: OpenRouter describes Aion-RP as a fine-tuned base model rather than an instruct model. Its weights are published under Apache 2.0. Input $0.80/M, output $1.60/M.',
       'thedrummer/rocinante-12b': 'Low-cost alternative tuned for storytelling and rich prose. Open weights are available. Input $0.17/M, output $0.43/M.',
       'thedrummer/unslopnemo-12b': 'Low-cost alternative designed for adventure writing and role-play. Open weights are available. Input $0.40/M, output $0.40/M.',
+      'cognitivecomputations/dolphin-mistral-24b-venice-edition:free': 'Free alternative: Venice Uncensored is an open-weight writing model intended for broad creative use. It is instruction-tuned, not a raw base checkpoint.',
+      'openai/gpt-oss-20b:free': 'Free alternative: gpt-oss-20b is an open-weight Apache 2.0 model. It is a general-purpose fallback rather than a writing-specific base checkpoint.',
+      'google/gemma-4-26b-a4b-it:free': 'Free alternative: Gemma 4 26B A4B IT is an open-weight instruction-tuned model under Gemma terms. It is not a raw base checkpoint.',
     }
 
     const form = document.querySelector('[data-story-form]')

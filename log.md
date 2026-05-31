@@ -1,3 +1,9 @@
+## 2026-05-31 add free story model alternatives
+expanded the story extender dropdown:
+- added free Venice Uncensored, gpt-oss-20b, and Gemma 4 26B options
+- labeled free instruction-tuned fallbacks separately from cheap continuation models
+- skipped DeepSeek because OpenRouter currently has no free DeepSeek route
+
 ## 2026-05-31 add story extender robot
 added a plain story continuation page:
 - sends editable tags and story text as one raw completion prompt with a 320-token cap
