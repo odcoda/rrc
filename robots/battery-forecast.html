@@ -395,7 +395,38 @@
     import { createChatCompletion, extractChatMessage } from '../shared/rrc-openrouter.js'
     import { getAuthState, onAuthChange } from '../shared/rrc-auth.js'
 
-    initRobotShell()
+    initRobotShell({
+      copy: {
+        title: 'BATTERY_FORECAST.EXE',
+        subtitle: 'OpenRouter uplink required for diagnostic scans.',
+        connect: 'ESTABLISH UPLINK',
+        disconnect: 'TERMINATE LINK',
+      },
+      theme: {
+        background: 'rgba(0, 17, 0, 0.96)',
+        borderColor: '#004400',
+        textColor: '#00ff00',
+        mutedTextColor: '#00aa00',
+        fontFamily: "'IBM Plex Mono', monospace",
+        titleFontFamily: "'IBM Plex Mono', monospace",
+        buttonBackground: '#003300',
+        buttonTextColor: '#00ff00',
+        buttonHoverBackground: '#00ff00',
+        buttonHoverTextColor: '#001100',
+        buttonShadow: '0 0 14px rgba(0, 255, 0, 0.22)',
+        buttonHoverShadow: '0 0 18px rgba(0, 255, 0, 0.52)',
+        ghostTextColor: '#00cc00',
+        ghostBorderColor: '#006600',
+        ghostHoverBackground: 'rgba(0, 255, 0, 0.1)',
+        errorColor: '#00ff00',
+        statusColors: {
+          authorized: '#00ff00',
+          authorizing: '#00cc00',
+          error: '#00ff00',
+          'signed-out': '#006600',
+        },
+      },
+    })
 
     const form = document.querySelector('[data-rrc-form]')
     const submitButton = document.querySelector('[data-rrc-submit]')

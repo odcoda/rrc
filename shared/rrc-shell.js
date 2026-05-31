@@ -7,20 +7,85 @@ const STATUS_LABELS = {
   'signed-out': 'Disconnected',
 }
 
-const STATUS_COLORS = {
-  authorized: '#1f7a6a',
-  authorizing: '#d6a038',
-  error: '#b94221',
-  'signed-out': '#b9aea4',
+const DEFAULT_COPY = {
+  title: 'Robot Roll Call',
+  subtitle: 'Sign in once, then summon every robot.',
+  connect: 'Connect OpenRouter',
+  disconnect: 'Sign out',
 }
 
-const buildAuthMarkup = () => {
+const DEFAULT_THEME = {
+  background: 'rgba(246, 239, 230, 0.85)',
+  borderColor: 'rgba(31, 27, 23, 0.1)',
+  textColor: '#1f1b17',
+  mutedTextColor: '#3a302a',
+  fontFamily: "'Space Grotesk', system-ui, -apple-system, sans-serif",
+  titleFontFamily: "'Fraunces', Georgia, serif",
+  buttonBackground: '#e4572e',
+  buttonTextColor: '#fff',
+  buttonHoverBackground: '#b94221',
+  buttonHoverTextColor: '#fff',
+  buttonShadow: '0 12px 20px rgba(228, 87, 46, 0.24)',
+  buttonHoverShadow: '0 16px 26px rgba(228, 87, 46, 0.28)',
+  ghostTextColor: '#b94221',
+  ghostBorderColor: 'rgba(228, 87, 46, 0.35)',
+  ghostHoverBackground: 'rgba(228, 87, 46, 0.1)',
+  errorColor: '#b94221',
+  statusColors: {
+    authorized: '#1f7a6a',
+    authorizing: '#d6a038',
+    error: '#b94221',
+    'signed-out': '#b9aea4',
+  },
+}
+
+const THEME_PROPERTIES = {
+  background: '--rrc-auth-background',
+  borderColor: '--rrc-auth-border-color',
+  textColor: '--rrc-auth-text-color',
+  mutedTextColor: '--rrc-auth-muted-text-color',
+  fontFamily: '--rrc-auth-font-family',
+  titleFontFamily: '--rrc-auth-title-font-family',
+  buttonBackground: '--rrc-auth-button-background',
+  buttonTextColor: '--rrc-auth-button-text-color',
+  buttonHoverBackground: '--rrc-auth-button-hover-background',
+  buttonHoverTextColor: '--rrc-auth-button-hover-text-color',
+  buttonShadow: '--rrc-auth-button-shadow',
+  buttonHoverShadow: '--rrc-auth-button-hover-shadow',
+  ghostTextColor: '--rrc-auth-ghost-text-color',
+  ghostBorderColor: '--rrc-auth-ghost-border-color',
+  ghostHoverBackground: '--rrc-auth-ghost-hover-background',
+  errorColor: '--rrc-auth-error-color',
+}
+
+const resolveOptions = (options) => ({
+  copy: {
+    ...DEFAULT_COPY,
+    ...options.copy,
+  },
+  theme: {
+    ...DEFAULT_THEME,
+    ...options.theme,
+    statusColors: {
+      ...DEFAULT_THEME.statusColors,
+      ...options.theme?.statusColors,
+    },
+  },
+})
+
+const applyTheme = (element, theme) => {
+  for (const [themeKey, property] of Object.entries(THEME_PROPERTIES)) {
+    element.style.setProperty(property, theme[themeKey])
+  }
+}
+
+const buildAuthMarkup = ({ copy, theme }) => {
   const wrapper = document.createElement('div')
   wrapper.className = 'rrc-auth'
   wrapper.innerHTML = `
     <div class="rrc-auth__brand">
-      <div class="rrc-auth__title">Robot Roll Call</div>
-      <div class="rrc-auth__subtitle">Sign in once, then summon every robot.</div>
+      <div class="rrc-auth__title" data-rrc-title></div>
+      <div class="rrc-auth__subtitle" data-rrc-subtitle></div>
     </div>
     <div>
       <div class="rrc-auth__status">
@@ -30,21 +95,28 @@ const buildAuthMarkup = () => {
       <div class="rrc-banner" data-rrc-status-error></div>
     </div>
     <div class="rrc-auth__actions">
-      <button class="rrc-button" data-rrc-action="connect">Connect OpenRouter</button>
-      <button class="rrc-button ghost" data-rrc-action="disconnect">Sign out</button>
+      <button class="rrc-button" data-rrc-action="connect"></button>
+      <button class="rrc-button ghost" data-rrc-action="disconnect"></button>
     </div>
   `
+
+  wrapper.querySelector('[data-rrc-title]').textContent = copy.title
+  wrapper.querySelector('[data-rrc-subtitle]').textContent = copy.subtitle
+  wrapper.querySelector('[data-rrc-action="connect"]').textContent = copy.connect
+  wrapper.querySelector('[data-rrc-action="disconnect"]').textContent = copy.disconnect
+  applyTheme(wrapper, theme)
 
   return wrapper
 }
 
-const updateAuthUI = (state, elements) => {
+const updateAuthUI = (state, elements, statusColors) => {
   const status = state.status || 'signed-out'
   const label = STATUS_LABELS[status] || STATUS_LABELS['signed-out']
+  const color = statusColors[status] || statusColors['signed-out']
 
   elements.statusText.textContent = label
-  elements.statusDot.style.backgroundColor = STATUS_COLORS[status] || STATUS_COLORS['signed-out']
-  elements.statusDot.style.boxShadow = `0 0 0 6px ${STATUS_COLORS[status] || STATUS_COLORS['signed-out']}33`
+  elements.statusDot.style.backgroundColor = color
+  elements.statusDot.style.boxShadow = `0 0 0 6px color-mix(in srgb, ${color} 20%, transparent)`
 
   const isAuthorized = status === 'authorized'
   elements.connectButton.disabled = status === 'authorizing'
@@ -58,16 +130,18 @@ const updateAuthUI = (state, elements) => {
   }
 }
 
-export const initRobotShell = async () => {
+export const initRobotShell = async (options = {}) => {
   const host = document.querySelector('[data-rrc-auth]')
   if (!host) {
     return
   }
 
+  const resolvedOptions = resolveOptions(options)
+
   host.classList.add('rrc-auth-host')
   host.innerHTML = ''
 
-  const markup = buildAuthMarkup()
+  const markup = buildAuthMarkup(resolvedOptions)
   host.appendChild(markup)
 
   const elements = {
@@ -90,8 +164,8 @@ export const initRobotShell = async () => {
     clearTokens()
   })
 
-  onAuthChange((state) => updateAuthUI(state, elements))
+  onAuthChange((state) => updateAuthUI(state, elements, resolvedOptions.theme.statusColors))
 
-  updateAuthUI(getAuthState(), elements)
+  updateAuthUI(getAuthState(), elements, resolvedOptions.theme.statusColors)
   await initAuth()
 }

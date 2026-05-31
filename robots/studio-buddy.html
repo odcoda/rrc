@@ -846,7 +846,36 @@
     import { createChatCompletion, extractChatMessage } from '../shared/rrc-openrouter.js'
     import { getAuthState, onAuthChange } from '../shared/rrc-auth.js'
 
-    initRobotShell()
+    initRobotShell({
+      copy: {
+        title: 'Studio Buddy',
+        subtitle: 'Connect OpenRouter when you want a fresh creative conversation.',
+        connect: 'Connect for buddy chat',
+        disconnect: 'Sign out',
+      },
+      theme: {
+        background: 'rgba(255, 249, 240, 0.92)',
+        borderColor: 'rgba(39, 49, 50, 0.12)',
+        textColor: '#273132',
+        mutedTextColor: '#566264',
+        fontFamily: "'Manrope', sans-serif",
+        titleFontFamily: "'Fraunces', serif",
+        buttonBackground: '#ec7c65',
+        buttonHoverBackground: '#d96c57',
+        buttonShadow: '0 12px 20px rgba(236, 124, 101, 0.24)',
+        buttonHoverShadow: '0 16px 26px rgba(236, 124, 101, 0.32)',
+        ghostTextColor: '#9b664f',
+        ghostBorderColor: 'rgba(155, 102, 79, 0.34)',
+        ghostHoverBackground: 'rgba(236, 124, 101, 0.1)',
+        errorColor: '#b85847',
+        statusColors: {
+          authorized: '#6aaa8e',
+          authorizing: '#d49c35',
+          error: '#b85847',
+          'signed-out': '#b7a49a',
+        },
+      },
+    })
 
     const STORAGE_KEY = 'rrc:studio-buddy:state:v1'
     const NOTEBOOK_KEY = 'rrc:studio-buddy:notebook:v1'

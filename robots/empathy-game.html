@@ -361,7 +361,35 @@
     import { createChatCompletion, extractChatMessage } from '../shared/rrc-openrouter.js'
     import { getAuthState, onAuthChange } from '../shared/rrc-auth.js'
 
-    initRobotShell()
+    initRobotShell({
+      copy: {
+        title: 'Empathy Game',
+        subtitle: 'Connect OpenRouter, then practice thoughtful support.',
+        connect: 'Connect to play',
+        disconnect: 'Sign out',
+      },
+      theme: {
+        background: 'rgba(255, 255, 255, 0.92)',
+        borderColor: 'rgba(102, 126, 234, 0.24)',
+        textColor: '#333333',
+        mutedTextColor: '#666666',
+        titleFontFamily: "'Space Grotesk', system-ui, sans-serif",
+        buttonBackground: '#667eea',
+        buttonHoverBackground: '#764ba2',
+        buttonShadow: '0 12px 20px rgba(102, 126, 234, 0.26)',
+        buttonHoverShadow: '0 16px 26px rgba(118, 75, 162, 0.32)',
+        ghostTextColor: '#667eea',
+        ghostBorderColor: 'rgba(102, 126, 234, 0.42)',
+        ghostHoverBackground: 'rgba(102, 126, 234, 0.1)',
+        errorColor: '#dc3545',
+        statusColors: {
+          authorized: '#20c997',
+          authorizing: '#ffc107',
+          error: '#dc3545',
+          'signed-out': '#aaaaaa',
+        },
+      },
+    })
 
     // Scenarios
     const scenarios = {

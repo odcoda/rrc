@@ -67,8 +67,10 @@ a {
   justify-content: space-between;
   gap: 16px;
   padding: 16px 5vw;
-  border-bottom: 1px solid var(--border);
-  background: rgba(246, 239, 230, 0.85);
+  border-bottom: 1px solid var(--rrc-auth-border-color, var(--border));
+  color: var(--rrc-auth-text-color, var(--ink));
+  background: var(--rrc-auth-background, rgba(246, 239, 230, 0.85));
+  font-family: var(--rrc-auth-font-family, 'Space Grotesk', system-ui, -apple-system, sans-serif);
 }
 
 .rrc-auth__brand {
@@ -78,14 +80,15 @@ a {
 }
 
 .rrc-auth__title {
-  font-family: 'Fraunces', Georgia, serif;
+  color: var(--rrc-auth-text-color, var(--ink));
+  font-family: var(--rrc-auth-title-font-family, 'Fraunces', Georgia, serif);
   font-size: 20px;
   letter-spacing: 0.5px;
 }
 
 .rrc-auth__subtitle {
   font-size: 13px;
-  color: var(--ink-soft);
+  color: var(--rrc-auth-muted-text-color, var(--ink-soft));
 }
 
 .rrc-auth__status {
@@ -93,7 +96,7 @@ a {
   align-items: center;
   gap: 8px;
   font-size: 13px;
-  color: var(--ink-soft);
+  color: var(--rrc-auth-muted-text-color, var(--ink-soft));
   text-transform: uppercase;
   letter-spacing: 1.4px;
 }
@@ -150,10 +153,40 @@ a {
   background: rgba(228, 87, 46, 0.1);
 }
 
+.rrc-auth .rrc-button {
+  color: var(--rrc-auth-button-text-color, #fff);
+  background: var(--rrc-auth-button-background, var(--accent));
+  box-shadow: var(--rrc-auth-button-shadow, 0 12px 20px rgba(228, 87, 46, 0.24));
+  font-family: inherit;
+}
+
+.rrc-auth .rrc-button:disabled {
+  box-shadow: none;
+}
+
+.rrc-auth .rrc-button:hover:not(:disabled) {
+  color: var(--rrc-auth-button-hover-text-color, #fff);
+  background: var(--rrc-auth-button-hover-background, var(--accent-dark));
+  box-shadow: var(--rrc-auth-button-hover-shadow, 0 16px 26px rgba(228, 87, 46, 0.28));
+}
+
+.rrc-auth .rrc-button.ghost {
+  color: var(--rrc-auth-ghost-text-color, var(--accent-dark));
+  background: transparent;
+  border-color: var(--rrc-auth-ghost-border-color, rgba(228, 87, 46, 0.35));
+  box-shadow: none;
+}
+
+.rrc-auth .rrc-button.ghost:hover:not(:disabled) {
+  color: var(--rrc-auth-ghost-text-color, var(--accent-dark));
+  background: var(--rrc-auth-ghost-hover-background, rgba(228, 87, 46, 0.1));
+  box-shadow: none;
+}
+
 .rrc-banner {
   margin-top: 10px;
   font-size: 12px;
-  color: var(--accent-dark);
+  color: var(--rrc-auth-error-color, var(--accent-dark));
   max-width: 380px;
 }
 

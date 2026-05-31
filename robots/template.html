@@ -40,7 +40,16 @@
     import { createChatCompletion, extractChatMessage } from '../shared/rrc-openrouter.js'
     import { getAuthState, onAuthChange } from '../shared/rrc-auth.js'
 
-    initRobotShell()
+    initRobotShell({
+      copy: {
+        title: 'Robot Template',
+        subtitle: 'Adjust this shared shell copy and theme for your robot.',
+      },
+      theme: {
+        background: 'rgba(239, 228, 213, 0.92)',
+        borderColor: 'rgba(31, 27, 23, 0.16)',
+      },
+    })
 
     const form = document.querySelector('[data-rrc-form]')
     const submitButton = document.querySelector('[data-rrc-submit]')

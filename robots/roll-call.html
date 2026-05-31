@@ -322,7 +322,38 @@
     import { createChatCompletion, extractChatMessage } from '../shared/rrc-openrouter.js'
     import { getAuthState, onAuthChange } from '../shared/rrc-auth.js'
 
-    initRobotShell()
+    initRobotShell({
+      copy: {
+        title: 'ROLL CALL UPLINK',
+        subtitle: 'Connect once. Light up the lineup.',
+        connect: 'CONNECT OPENROUTER',
+        disconnect: 'SIGN OFF',
+      },
+      theme: {
+        background: 'rgba(15, 15, 26, 0.94)',
+        borderColor: '#3a3a5a',
+        textColor: '#ffd700',
+        mutedTextColor: '#ff6b35',
+        fontFamily: "'VT323', monospace",
+        titleFontFamily: "'VT323', monospace",
+        buttonBackground: '#ff8c00',
+        buttonTextColor: '#1a1a2e',
+        buttonHoverBackground: '#ffd700',
+        buttonHoverTextColor: '#1a1a2e',
+        buttonShadow: '0 0 16px rgba(255, 140, 0, 0.42)',
+        buttonHoverShadow: '0 0 22px rgba(255, 215, 0, 0.58)',
+        ghostTextColor: '#ff6b35',
+        ghostBorderColor: '#ff6b35',
+        ghostHoverBackground: 'rgba(255, 107, 53, 0.14)',
+        errorColor: '#ff6b35',
+        statusColors: {
+          authorized: '#ffd700',
+          authorizing: '#ff8c00',
+          error: '#ff6b35',
+          'signed-out': '#5a5a7a',
+        },
+      },
+    })
 
     const form = document.querySelector('[data-rrc-form]')
     const submitButton = document.querySelector('[data-rrc-submit]')

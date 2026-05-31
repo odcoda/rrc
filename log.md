@@ -1,3 +1,9 @@
+## 2026-05-30 customizable auth bar themes
+made the shared auth bar configurable per robot without duplicating markup:
+- added `initRobotShell({ copy, theme })` options for text, fonts, colors, buttons, and status dots
+- gave each robot page a matching auth bar theme
+- updated the template and authoring note with the configuration pattern
+
 ## 2026-03-24 add studio buddy robot
 built a new creative support robot page:
 - added studio-buddy.html with local project memory, plain-text notebook preview, streak tracking, and fresh-session buddy chat
