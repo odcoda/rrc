@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LLM Game Arena - Robot Roll Call</title>
+  <link rel="stylesheet" href="../assets/rrc.css">
+  <style>
+    :root {
+      --arena-ink: #202523;
+      --arena-muted: #52605a;
+      --arena-line: rgba(32, 37, 35, 0.16);
+      --arena-panel: rgba(255, 255, 255, 0.9);
+      --arena-paper: #f7f9ef;
+      --arena-green: #20756c;
+      --arena-green-dark: #154c46;
+      --arena-coral: #f16d55;
+      --arena-yellow: #dbe85c;
+      --arena-aqua: #a8e6d1;
+      --arena-violet: #6d5a8d;
+      --arena-shadow: 0 16px 36px rgba(23, 42, 38, 0.14);
+    }
+
+    body {
+      color: var(--arena-ink);
+      background:
+        linear-gradient(90deg, rgba(32, 37, 35, 0.05) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(32, 37, 35, 0.05) 1px, transparent 1px),
+        linear-gradient(135deg, #f7f9ef 0%, #e7f4ec 42%, #fff2e8 100%) !important;
+      background-size: 36px 36px, 36px 36px, auto;
+    }
+
+    body::before {
+      display: none;
+    }
+
+    .arena-shell {
+      width: min(1220px, 94vw);
+      margin: 0 auto;
+      padding: 26px 0 68px;
+    }
+
+    .arena-back {
+      display: inline-flex;
+      color: var(--arena-green-dark);
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-decoration: none;
+      margin-bottom: 16px;
+    }
+
+    .arena-back:hover {
+      text-decoration: underline;
+    }
+
+    .arena-top {
+      display: grid;
+      grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.7fr);
+      gap: 16px;
+      align-items: stretch;
+      margin-bottom: 16px;
+    }
+
+    .arena-hero,
+    .arena-summary,
+    .arena-controls,
+    .arena-live,
+    .arena-transcript {
+      border: 1px solid var(--arena-line);
+      border-radius: 8px;
+      background: var(--arena-panel);
+      box-shadow: var(--arena-shadow);
+    }
+
+    .arena-hero {
+      position: relative;
+      overflow: hidden;
+      min-height: 232px;
+      padding: 24px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 280px;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .arena-hero::after {
+      content: '';
+      position: absolute;
+      inset: auto 24px 18px auto;
+      width: 230px;
+      height: 138px;
+      border: 1px solid rgba(32, 37, 35, 0.14);
+      border-radius: 8px;
+      background:
+        linear-gradient(90deg, transparent 49%, rgba(32, 37, 35, 0.2) 50%, transparent 51%),
+        linear-gradient(180deg, rgba(32, 117, 108, 0.9), rgba(21, 76, 70, 0.94));
+      box-shadow: inset 0 0 0 10px rgba(255, 255, 255, 0.1);
+      pointer-events: none;
+    }
+
+    .arena-hero-copy {
+      position: relative;
+      z-index: 1;
+      max-width: 680px;
+    }
+
+    .arena-kicker,
+    .arena-label {
+      margin: 0;
+      color: var(--arena-green-dark);
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .arena-hero h1 {
+      margin: 8px 0 10px;
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 3.4rem;
+      line-height: 1;
+    }
+
+    .arena-hero p {
+      margin: 0;
+      color: var(--arena-muted);
+      font-size: 1rem;
+      line-height: 1.55;
+    }
+
+    .arena-visual {
+      position: relative;
+      z-index: 1;
+      height: 170px;
+      display: grid;
+      place-items: center;
+    }
+
+    .arena-token-orbit {
+      position: relative;
+      width: 172px;
+      height: 172px;
+      border: 1px solid rgba(32, 37, 35, 0.14);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.5);
+    }
+
+    .arena-token-orbit span {
+      position: absolute;
+      display: grid;
+      place-items: center;
+      width: 58px;
+      height: 58px;
+      border: 2px solid rgba(32, 37, 35, 0.16);
+      border-radius: 8px;
+      color: var(--arena-ink);
+      background: #fff;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-weight: 800;
+      box-shadow: 0 10px 20px rgba(23, 42, 38, 0.12);
+    }
+
+    .arena-token-orbit span:nth-child(1) {
+      top: 8px;
+      left: 57px;
+      background: var(--arena-yellow);
+    }
+
+    .arena-token-orbit span:nth-child(2) {
+      right: 8px;
+      bottom: 28px;
+      background: var(--arena-aqua);
+    }
+
+    .arena-token-orbit span:nth-child(3) {
+      left: 8px;
+      bottom: 28px;
+      background: #fff;
+    }
+
+    .arena-summary {
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+      align-content: start;
+    }
+
+    .arena-score-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .arena-score {
+      padding: 14px;
+      border: 1px solid var(--arena-line);
+      border-radius: 8px;
+      background: #fff;
+    }
+
+    .arena-score strong {
+      display: block;
+      margin-top: 8px;
+      font-size: 2.2rem;
+      line-height: 1;
+    }
+
+    .arena-status {
+      min-height: 48px;
+      margin: 0;
+      color: var(--arena-muted);
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+
+    .arena-main {
+      display: grid;
+      grid-template-columns: minmax(320px, 0.84fr) minmax(0, 1.36fr);
+      gap: 16px;
+      align-items: start;
+    }
+
+    .arena-controls,
+    .arena-live,
+    .arena-transcript {
+      padding: 18px;
+    }
+
+    .arena-controls {
+      display: grid;
+      gap: 18px;
+    }
+
+    .arena-controls h2,
+    .arena-live h2,
+    .arena-transcript h2 {
+      margin: 0;
+      font-family: 'Fraunces', Georgia, serif;
+      font-size: 1.45rem;
+    }
+
+    .arena-form-section {
+      display: grid;
+      gap: 10px;
+    }
+
+    .arena-segment {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .arena-segment input,
+    .arena-switch input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .arena-segment span,
+    .arena-switch span {
+      display: grid;
+      place-items: center;
+      min-height: 44px;
+      padding: 10px 12px;
+      border: 1px solid var(--arena-line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--arena-muted);
+      font-weight: 800;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .arena-segment input:checked + span,
+    .arena-switch input:checked + span {
+      border-color: rgba(32, 117, 108, 0.48);
+      color: #fff;
+      background: var(--arena-green);
+    }
+
+    .arena-field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .arena-field label,
+    .arena-player-title {
+      color: var(--arena-muted);
+      font-size: 0.84rem;
+      font-weight: 800;
+    }
+
+    .arena-field input,
+    .arena-field textarea,
+    .arena-field select {
+      width: 100%;
+      border: 1px solid var(--arena-line);
+      border-radius: 8px;
+      padding: 10px 11px;
+      color: var(--arena-ink);
+      background: #fff;
+      font: inherit;
+    }
+
+    .arena-field textarea {
+      min-height: 86px;
+      resize: vertical;
+      line-height: 1.45;
+    }
+
+    .arena-field input:focus,
+    .arena-field textarea:focus,
+    .arena-field select:focus {
+      outline: 2px solid rgba(32, 117, 108, 0.24);
+      outline-offset: 1px;
+    }
+
+    .arena-player-configs {
+      display: grid;
+      gap: 10px;
+    }
+
+    .arena-player-config {
+      padding: 12px;
+      border: 1px solid var(--arena-line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.74);
+      display: grid;
+      gap: 10px;
+    }
+
+    .arena-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .arena-button {
+      border: 0;
+      border-radius: 8px;
+      min-height: 42px;
+      padding: 10px 14px;
+      color: #fff;
+      background: var(--arena-coral);
+      cursor: pointer;
+      font: inherit;
+      font-weight: 800;
+      transition: transform 0.16s ease, background 0.16s ease;
+    }
+
+    .arena-button:hover:not(:disabled) {
+      transform: translateY(-1px);
+      background: #cf553f;
+    }
+
+    .arena-button.secondary {
+      color: var(--arena-green-dark);
+      border: 1px solid rgba(32, 117, 108, 0.32);
+      background: #fff;
+    }
+
+    .arena-button.secondary:hover:not(:disabled) {
+      background: #e7f4ec;
+    }
+
+    .arena-button:disabled {
+      opacity: 0.58;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .arena-note {
+      margin: 0;
+      color: var(--arena-muted);
+      font-size: 0.84rem;
+      line-height: 1.45;
+    }
+
+    .arena-guide {
+      display: grid;
+      gap: 8px;
+      padding: 12px;
+      border: 1px solid rgba(32, 117, 108, 0.24);
+      border-radius: 8px;
+      background: rgba(168, 230, 209, 0.18);
+    }
+
+    .arena-guide code,
+    .arena-move,
+    .arena-raw {
+      font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+    }
+
+    .arena-guide code {
+      display: inline-block;
+      margin: 2px 4px 2px 0;
+      padding: 3px 6px;
+      border-radius: 6px;
+      background: #fff;
+      color: var(--arena-green-dark);
+      font-size: 0.8rem;
+      font-weight: 800;
+    }
+
+    .arena-live {
+      display: grid;
+      gap: 16px;
+    }
+
+    .arena-board {
+      position: relative;
+      min-height: 300px;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 150px minmax(0, 1fr);
+      gap: 14px;
+      align-items: center;
+      padding: 18px;
+      border: 1px solid rgba(32, 37, 35, 0.14);
+      border-radius: 8px;
+      background:
+        linear-gradient(90deg, transparent 49.5%, rgba(255, 255, 255, 0.28) 50%, transparent 50.5%),
+        linear-gradient(180deg, rgba(32, 117, 108, 0.95), rgba(21, 76, 70, 0.98));
+      color: #fff;
+      overflow: hidden;
+    }
+
+    .arena-board::before {
+      content: '';
+      position: absolute;
+      inset: 22px;
+      border: 2px solid rgba(255, 255, 255, 0.24);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .arena-seat {
+      position: relative;
+      z-index: 1;
+      min-height: 220px;
+      display: grid;
+      gap: 12px;
+      align-content: center;
+      padding: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.24);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.11);
+      backdrop-filter: blur(4px);
+    }
+
+    .arena-seat-title {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    .arena-seat h3 {
+      margin: 0;
+      font-size: 1.18rem;
+    }
+
+    .arena-move-token {
+      display: grid;
+      place-items: center;
+      width: 92px;
+      height: 92px;
+      border: 2px solid rgba(32, 37, 35, 0.16);
+      border-radius: 8px;
+      color: var(--arena-ink);
+      background: var(--arena-yellow);
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 1.6rem;
+      font-weight: 800;
+      box-shadow: 0 14px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .arena-seat:last-child .arena-move-token {
+      background: var(--arena-aqua);
+    }
+
+    .arena-message {
+      min-height: 58px;
+      margin: 0;
+      padding: 10px;
+      border-radius: 8px;
+      color: rgba(255, 255, 255, 0.86);
+      background: rgba(255, 255, 255, 0.12);
+      font-size: 0.86rem;
+      line-height: 1.35;
+    }
+
+    .arena-vs {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      width: 94px;
+      height: 94px;
+      margin: 0 auto;
+      border: 2px solid rgba(255, 255, 255, 0.28);
+      border-radius: 50%;
+      background: rgba(32, 37, 35, 0.32);
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 1.2rem;
+      font-weight: 800;
+    }
+
+    .arena-round-result {
+      margin: 0;
+      color: var(--arena-muted);
+      font-size: 0.98rem;
+      line-height: 1.45;
+    }
+
+    .arena-transcript {
+      margin-top: 16px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .arena-round-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .arena-round {
+      padding: 12px;
+      border: 1px solid var(--arena-line);
+      border-radius: 8px;
+      background: #fff;
+      display: grid;
+      gap: 8px;
+    }
+
+    .arena-round-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--arena-muted);
+      font-size: 0.84rem;
+      font-weight: 800;
+    }
+
+    .arena-round-plays {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .arena-play {
+      display: grid;
+      gap: 5px;
+      min-width: 0;
+      padding: 10px;
+      border-radius: 8px;
+      background: var(--arena-paper);
+    }
+
+    .arena-play b {
+      overflow-wrap: anywhere;
+    }
+
+    .arena-move {
+      color: var(--arena-green-dark);
+      font-size: 0.9rem;
+      font-weight: 800;
+    }
+
+    .arena-warning {
+      color: #a03e2c;
+      font-size: 0.8rem;
+      font-weight: 800;
+    }
+
+    .arena-raw {
+      margin-top: 4px;
+      color: var(--arena-muted);
+      font-size: 0.78rem;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .arena-empty {
+      min-height: 90px;
+      display: grid;
+      place-items: center;
+      border: 1px dashed var(--arena-line);
+      border-radius: 8px;
+      color: var(--arena-muted);
+      background: rgba(255, 255, 255, 0.52);
+      text-align: center;
+    }
+
+    @media (max-width: 920px) {
+      .arena-top,
+      .arena-main,
+      .arena-hero {
+        grid-template-columns: 1fr;
+      }
+
+      .arena-hero::after {
+        opacity: 0.28;
+      }
+
+      .arena-board {
+        grid-template-columns: 1fr;
+      }
+
+      .arena-vs {
+        width: 72px;
+        height: 72px;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .arena-shell {
+        width: min(100% - 24px, 1220px);
+      }
+
+      .arena-hero h1 {
+        font-size: 2.35rem;
+      }
+
+      .arena-round-plays,
+      .arena-score-grid,
+      .arena-segment {
+        grid-template-columns: 1fr;
+      }
+
+      .arena-actions {
+        align-items: stretch;
+      }
+
+      .arena-button {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div data-rrc-auth></div>
+
+  <main class="arena-shell">
+    <a class="arena-back" href="../index.html">Back to roster</a>
+
+    <section class="arena-top">
+      <header class="arena-hero">
+        <div class="arena-hero-copy">
+          <p class="arena-kicker">Referee-run LLM matches</p>
+          <h1>LLM Game Arena</h1>
+          <p>Run small simultaneous games where each model returns a move in referee-readable notation. The page parses the move locally, scores the round, and carries optional table talk into the next prompt.</p>
+        </div>
+        <div class="arena-visual" aria-hidden="true">
+          <div class="arena-token-orbit">
+            <span>R</span>
+            <span>P</span>
+            <span>D</span>
+          </div>
+        </div>
+      </header>
+
+      <aside class="arena-summary">
+        <p class="arena-label">Match score</p>
+        <div class="arena-score-grid">
+          <div class="arena-score">
+            <span data-score-a-name>Model A</span>
+            <strong data-score-a>0</strong>
+          </div>
+          <div class="arena-score">
+            <span data-score-b-name>Model B</span>
+            <strong data-score-b>0</strong>
+          </div>
+        </div>
+        <p class="arena-status" data-arena-status>Connect OpenRouter to start a match.</p>
+        <a class="rrc-link" href="../reports/llm-game-framework.html">Read framework report</a>
+      </aside>
+    </section>
+
+    <section class="arena-main">
+      <form class="arena-controls" data-match-form>
+        <h2>Match Setup</h2>
+
+        <div class="arena-form-section">
+          <p class="arena-label">Game</p>
+          <div class="arena-segment" data-game-picker>
+            <label>
+              <input type="radio" name="game" value="rps" checked>
+              <span>Rock Paper Scissors</span>
+            </label>
+            <label>
+              <input type="radio" name="game" value="pd">
+              <span>Prisoner's Dilemma</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="arena-form-section">
+          <div class="arena-field">
+            <label for="rounds">Rounds</label>
+            <input id="rounds" name="rounds" type="number" min="1" max="8" value="3">
+          </div>
+          <label class="arena-switch">
+            <input type="checkbox" name="sideChannel" checked>
+            <span>Side-channel table talk</span>
+          </label>
+        </div>
+
+        <section class="arena-player-configs" aria-label="Player configuration">
+          <div class="arena-player-config">
+            <div class="arena-player-title">Player A</div>
+            <div class="arena-field">
+              <label for="playerAName">Name</label>
+              <input id="playerAName" name="playerAName" value="Red Bot">
+            </div>
+            <div class="arena-field">
+              <label for="playerAModel">OpenRouter model</label>
+              <input id="playerAModel" name="playerAModel" value="openrouter/auto">
+            </div>
+            <div class="arena-field">
+              <label for="playerAStrategy">Strategy prompt</label>
+              <textarea id="playerAStrategy" name="playerAStrategy">Play clean notation. Use the message line to sound confident without revealing your full plan.</textarea>
+            </div>
+          </div>
+
+          <div class="arena-player-config">
+            <div class="arena-player-title">Player B</div>
+            <div class="arena-field">
+              <label for="playerBName">Name</label>
+              <input id="playerBName" name="playerBName" value="Blue Bot">
+            </div>
+            <div class="arena-field">
+              <label for="playerBModel">OpenRouter model</label>
+              <input id="playerBModel" name="playerBModel" value="openrouter/auto">
+            </div>
+            <div class="arena-field">
+              <label for="playerBStrategy">Strategy prompt</label>
+              <textarea id="playerBStrategy" name="playerBStrategy">Exploit patterns if you see them. Keep your move legal and your table talk short.</textarea>
+            </div>
+          </div>
+        </section>
+
+        <div class="arena-guide" data-game-guide></div>
+
+        <div class="arena-actions">
+          <button class="arena-button" type="submit" data-start-match>Start Match</button>
+          <button class="arena-button secondary" type="button" data-clear-match>Clear</button>
+          <p class="arena-note" data-auth-note></p>
+        </div>
+      </form>
+
+      <div>
+        <section class="arena-live">
+          <h2>Live Table</h2>
+          <div class="arena-board">
+            <article class="arena-seat">
+              <p class="arena-seat-title">Player A</p>
+              <h3 data-seat-a-name>Red Bot</h3>
+              <div class="arena-move-token" data-seat-a-move>?</div>
+              <p class="arena-message" data-seat-a-message>Waiting for the first round.</p>
+            </article>
+
+            <div class="arena-vs" data-round-label>R0</div>
+
+            <article class="arena-seat">
+              <p class="arena-seat-title">Player B</p>
+              <h3 data-seat-b-name>Blue Bot</h3>
+              <div class="arena-move-token" data-seat-b-move>?</div>
+              <p class="arena-message" data-seat-b-message>Waiting for the first round.</p>
+            </article>
+          </div>
+          <p class="arena-round-result" data-round-result>No rounds played yet.</p>
+        </section>
+
+        <section class="arena-transcript">
+          <h2>Transcript</h2>
+          <div class="arena-round-list" data-round-list>
+            <div class="arena-empty">Match transcript will appear here.</div>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    import { initRobotShell } from '../shared/rrc-shell.js'
+    import { createChatCompletion, extractChatMessage } from '../shared/rrc-openrouter.js'
+    import { getAuthState, onAuthChange } from '../shared/rrc-auth.js'
+
+    initRobotShell({
+      copy: {
+        title: 'LLM Game Arena',
+        subtitle: 'Connect OpenRouter, then referee model-vs-model matches.',
+      },
+      theme: {
+        background: 'rgba(247, 249, 239, 0.94)',
+        borderColor: 'rgba(32, 37, 35, 0.16)',
+        textColor: '#202523',
+        mutedTextColor: '#52605a',
+        buttonBackground: '#f16d55',
+        buttonHoverBackground: '#cf553f',
+        ghostTextColor: '#154c46',
+        ghostBorderColor: 'rgba(32, 117, 108, 0.32)',
+        ghostHoverBackground: 'rgba(168, 230, 209, 0.26)',
+        errorColor: '#a03e2c',
+        statusColors: {
+          authorized: '#20756c',
+          authorizing: '#9f8f24',
+          error: '#a03e2c',
+          'signed-out': '#9aa49f',
+        },
+      },
+    })
+
+    const MESSAGE_LIMIT = 180
+    const RESPONSE_LIMIT = 800
+
+    const toWords = (value) => String(value || '')
+      .toUpperCase()
+      .replace(/[^A-Z]+/g, ' ')
+      .trim()
+
+    const firstWord = (value) => toWords(value).split(/\s+/)[0] || ''
+
+    const hasWord = (value, word) => new RegExp(`\\b${word}\\b`, 'i').test(value)
+
+    const limitText = (value, maxLength) => {
+      const text = String(value || '').replace(/\s+/g, ' ').trim()
+      return text.length > maxLength ? `${text.slice(0, maxLength - 3)}...` : text
+    }
+
+    const GAMES = {
+      rps: {
+        id: 'rps',
+        name: 'Rock Paper Scissors',
+        legalMoves: ['ROCK', 'PAPER', 'SCISSORS'],
+        aliases: {
+          ROCK: 'ROCK',
+          R: 'ROCK',
+          STONE: 'ROCK',
+          PAPER: 'PAPER',
+          P: 'PAPER',
+          SCISSOR: 'SCISSORS',
+          SCISSORS: 'SCISSORS',
+          S: 'SCISSORS',
+        },
+        guide: 'Legal moves are ROCK, PAPER, and SCISSORS. Winner gets 1 point.',
+        interpret(raw) {
+          const head = firstWord(raw)
+          if (this.aliases[head]) {
+            return this.aliases[head]
+          }
+          const words = toWords(raw)
+          for (const [alias, move] of Object.entries(this.aliases)) {
+            if (alias.length > 1 && hasWord(words, alias)) {
+              return move
+            }
+          }
+          return null
+        },
+        scoreRound(aMove, bMove, names) {
+          if (aMove === bMove) {
+            return { a: 0, b: 0, result: 'Tie throw. No points awarded.' }
+          }
+          const aWins = (
+            (aMove === 'ROCK' && bMove === 'SCISSORS') ||
+            (aMove === 'PAPER' && bMove === 'ROCK') ||
+            (aMove === 'SCISSORS' && bMove === 'PAPER')
+          )
+          return aWins
+            ? { a: 1, b: 0, result: `${names.a} wins the throw.` }
+            : { a: 0, b: 1, result: `${names.b} wins the throw.` }
+        },
+      },
+      pd: {
+        id: 'pd',
+        name: "Prisoner's Dilemma",
+        legalMoves: ['COOPERATE', 'DEFECT'],
+        guide: 'Legal moves are COOPERATE and DEFECT. Payoffs are C/C = 3/3, C/D = 0/5, D/C = 5/0, D/D = 1/1.',
+        interpret(raw) {
+          const words = toWords(raw)
+          const head = firstWord(raw)
+          if (head === 'C' || head === 'COOP' || head === 'COOPERATE' || hasWord(words, 'SILENT')) {
+            return 'COOPERATE'
+          }
+          if (head === 'D' || head === 'DEFECT' || head === 'BETRAY' || hasWord(words, 'CONFESS')) {
+            return 'DEFECT'
+          }
+          if (hasWord(words, 'COOPERATE') || hasWord(words, 'COOP')) {
+            return 'COOPERATE'
+          }
+          if (hasWord(words, 'DEFECT') || hasWord(words, 'BETRAY')) {
+            return 'DEFECT'
+          }
+          return null
+        },
+        scoreRound(aMove, bMove, names) {
+          if (aMove === 'COOPERATE' && bMove === 'COOPERATE') {
+            return { a: 3, b: 3, result: 'Mutual cooperation. Both players score 3.' }
+          }
+          if (aMove === 'DEFECT' && bMove === 'DEFECT') {
+            return { a: 1, b: 1, result: 'Mutual defection. Both players score 1.' }
+          }
+          if (aMove === 'DEFECT' && bMove === 'COOPERATE') {
+            return { a: 5, b: 0, result: `${names.a} defects while ${names.b} cooperates.` }
+          }
+          return { a: 0, b: 5, result: `${names.b} defects while ${names.a} cooperates.` }
+        },
+      },
+    }
+
+    const form = document.querySelector('[data-match-form]')
+    const startButton = document.querySelector('[data-start-match]')
+    const clearButton = document.querySelector('[data-clear-match]')
+    const authNote = document.querySelector('[data-auth-note]')
+    const statusText = document.querySelector('[data-arena-status]')
+    const guide = document.querySelector('[data-game-guide]')
+    const roundList = document.querySelector('[data-round-list]')
+    const scoreA = document.querySelector('[data-score-a]')
+    const scoreB = document.querySelector('[data-score-b]')
+    const scoreAName = document.querySelector('[data-score-a-name]')
+    const scoreBName = document.querySelector('[data-score-b-name]')
+    const seatAName = document.querySelector('[data-seat-a-name]')
+    const seatBName = document.querySelector('[data-seat-b-name]')
+    const seatAMove = document.querySelector('[data-seat-a-move]')
+    const seatBMove = document.querySelector('[data-seat-b-move]')
+    const seatAMessage = document.querySelector('[data-seat-a-message]')
+    const seatBMessage = document.querySelector('[data-seat-b-message]')
+    const roundLabel = document.querySelector('[data-round-label]')
+    const roundResult = document.querySelector('[data-round-result]')
+
+    let isRunning = false
+    let match = {
+      score: { a: 0, b: 0 },
+      history: [],
+    }
+
+    const getFormConfig = () => {
+      const data = new FormData(form)
+      const rounds = Math.min(8, Math.max(1, Number(data.get('rounds')) || 1))
+      return {
+        game: GAMES[data.get('game')] || GAMES.rps,
+        rounds,
+        sideChannel: data.get('sideChannel') === 'on',
+        players: {
+          a: {
+            key: 'a',
+            name: String(data.get('playerAName') || 'Model A').trim() || 'Model A',
+            model: String(data.get('playerAModel') || 'openrouter/auto').trim() || 'openrouter/auto',
+            strategy: String(data.get('playerAStrategy') || '').trim(),
+          },
+          b: {
+            key: 'b',
+            name: String(data.get('playerBName') || 'Model B').trim() || 'Model B',
+            model: String(data.get('playerBModel') || 'openrouter/auto').trim() || 'openrouter/auto',
+            strategy: String(data.get('playerBStrategy') || '').trim(),
+          },
+        },
+      }
+    }
+
+    const updateAuthNote = (state) => {
+      if (state.status === 'authorized') {
+        startButton.disabled = isRunning
+        authNote.textContent = isRunning ? 'Match running.' : 'OpenRouter connected.'
+      } else if (state.status === 'authorizing') {
+        startButton.disabled = true
+        authNote.textContent = 'Connecting to OpenRouter...'
+      } else if (state.status === 'error') {
+        startButton.disabled = true
+        authNote.textContent = 'OpenRouter auth error. Reconnect with the top bar.'
+      } else {
+        startButton.disabled = true
+        authNote.textContent = 'Connect OpenRouter with the top bar to run model matches.'
+      }
+    }
+
+    const renderGuide = () => {
+      const { game } = getFormConfig()
+      guide.innerHTML = ''
+
+      const label = document.createElement('p')
+      label.className = 'arena-label'
+      label.textContent = 'Move contract'
+
+      const copy = document.createElement('p')
+      copy.className = 'arena-note'
+      copy.textContent = game.guide
+
+      const moves = document.createElement('div')
+      for (const move of game.legalMoves) {
+        const code = document.createElement('code')
+        code.textContent = `MOVE: ${move}`
+        moves.append(code)
+      }
+
+      guide.append(label, copy, moves)
+    }
+
+    const setScoreNames = (players) => {
+      scoreAName.textContent = players.a.name
+      scoreBName.textContent = players.b.name
+      seatAName.textContent = players.a.name
+      seatBName.textContent = players.b.name
+    }
+
+    const updateScoreboard = () => {
+      scoreA.textContent = match.score.a
+      scoreB.textContent = match.score.b
+    }
+
+    const resetBoard = () => {
+      const { players } = getFormConfig()
+      match = { score: { a: 0, b: 0 }, history: [] }
+      setScoreNames(players)
+      updateScoreboard()
+      seatAMove.textContent = '?'
+      seatBMove.textContent = '?'
+      seatAMessage.textContent = 'Waiting for the first round.'
+      seatBMessage.textContent = 'Waiting for the first round.'
+      roundLabel.textContent = 'R0'
+      roundResult.textContent = 'No rounds played yet.'
+      statusText.textContent = getAuthState().status === 'authorized'
+        ? 'Ready to start a match.'
+        : 'Connect OpenRouter to start a match.'
+      renderHistory()
+    }
+
+    const renderPlayerPlay = (round, playerKey, player) => {
+      const play = round[playerKey]
+      const wrapper = document.createElement('div')
+      wrapper.className = 'arena-play'
+
+      const name = document.createElement('b')
+      name.textContent = player.name
+
+      const move = document.createElement('span')
+      move.className = 'arena-move'
+      move.textContent = play.move
+
+      wrapper.append(name, move)
+
+      if (!play.valid) {
+        const warning = document.createElement('span')
+        warning.className = 'arena-warning'
+        warning.textContent = 'Referee substituted an invalid response.'
+        wrapper.append(warning)
+      }
+
+      if (play.message) {
+        const message = document.createElement('span')
+        message.textContent = play.message
+        wrapper.append(message)
+      }
+
+      const details = document.createElement('details')
+      const summary = document.createElement('summary')
+      summary.textContent = 'Raw response'
+      const raw = document.createElement('pre')
+      raw.className = 'arena-raw'
+      raw.textContent = play.raw
+      details.append(summary, raw)
+      wrapper.append(details)
+
+      return wrapper
+    }
+
+    const renderHistory = () => {
+      const { players } = getFormConfig()
+      roundList.innerHTML = ''
+
+      if (!match.history.length) {
+        const empty = document.createElement('div')
+        empty.className = 'arena-empty'
+        empty.textContent = 'Match transcript will appear here.'
+        roundList.append(empty)
+        return
+      }
+
+      for (const round of [...match.history].reverse()) {
+        const card = document.createElement('article')
+        card.className = 'arena-round'
+
+        const header = document.createElement('div')
+        header.className = 'arena-round-header'
+        const number = document.createElement('span')
+        number.textContent = `Round ${round.round}`
+        const result = document.createElement('span')
+        result.textContent = `Score ${round.cumulative.a}-${round.cumulative.b}`
+        header.append(number, result)
+
+        const plays = document.createElement('div')
+        plays.className = 'arena-round-plays'
+        plays.append(
+          renderPlayerPlay(round, 'a', players.a),
+          renderPlayerPlay(round, 'b', players.b),
+        )
+
+        const outcome = document.createElement('p')
+        outcome.className = 'arena-note'
+        outcome.textContent = round.result
+
+        card.append(header, plays, outcome)
+        roundList.append(card)
+      }
+    }
+
+    const parseResponse = (text, game, sideChannel) => {
+      const raw = String(text || '').replace(/```[a-z]*\n?/gi, '').replace(/```/g, '').trim()
+      const lines = raw.split(/\r?\n/).map((line) => line.trim()).filter(Boolean)
+      const moveLine = lines.find((line) => /^move\s*[:=-]/i.test(line))
+      const messageLine = lines.find((line) => /^message\s*[:=-]/i.test(line))
+      const explicitMove = moveLine ? moveLine.replace(/^move\s*[:=-]\s*/i, '') : ''
+      const parsedMove = game.interpret(explicitMove) || game.interpret(raw)
+      const valid = Boolean(parsedMove)
+      const move = parsedMove || game.legalMoves[Math.floor(Math.random() * game.legalMoves.length)]
+      const message = sideChannel && messageLine
+        ? limitText(messageLine.replace(/^message\s*[:=-]\s*/i, ''), MESSAGE_LIMIT)
+        : ''
+
+      return {
+        move,
+        message,
+        valid,
+        raw: limitText(raw || '(empty response)', RESPONSE_LIMIT),
+      }
+    }
+
+    const historyForPrompt = (history, playerKey) => {
+      const opponentKey = playerKey === 'a' ? 'b' : 'a'
+      if (!history.length) {
+        return 'No completed rounds yet.'
+      }
+
+      return history.slice(-5).map((round) => {
+        const playerMove = round[playerKey].move
+        const opponentMove = round[opponentKey].move
+        const opponentMessage = round[opponentKey].message || 'No table talk.'
+        return `Round ${round.round}: you played ${playerMove}; opponent played ${opponentMove}; opponent message: ${opponentMessage}; result: ${round.result}`
+      }).join('\n')
+    }
+
+    const buildPrompt = ({ game, players, sideChannel }, playerKey, roundNumber, totalRounds, score) => {
+      const player = players[playerKey]
+      const opponentKey = playerKey === 'a' ? 'b' : 'a'
+      const opponent = players[opponentKey]
+      const legal = game.legalMoves.join(', ')
+      const tableTalk = sideChannel
+        ? `You may include one short MESSAGE line. It is visible to ${opponent.name} before the next round and cannot change the legal move this round.`
+        : 'Do not include a MESSAGE line. Messages are disabled for this match.'
+
+      return `Game: ${game.name}
+Round: ${roundNumber} of ${totalRounds}
+You are: ${player.name}
+Opponent: ${opponent.name}
+Score before this round: ${players.a.name} ${score.a}, ${players.b.name} ${score.b}
+Legal moves: ${legal}
+
+Your private strategy prompt:
+${player.strategy || 'No extra strategy.'}
+
+Recent public history:
+${historyForPrompt(match.history, playerKey)}
+
+Return exactly this format:
+MOVE: <one legal move>
+MESSAGE: <optional short table talk>
+
+${tableTalk}`
+    }
+
+    const callPlayer = async (config, playerKey, roundNumber) => {
+      const player = config.players[playerKey]
+      const prompt = buildPrompt(config, playerKey, roundNumber, config.rounds, match.score)
+      const response = await createChatCompletion({
+        model: player.model,
+        messages: [
+          {
+            role: 'system',
+            content: 'You are a competitive game-playing model. Follow the referee notation exactly and never return more than one legal move.',
+          },
+          { role: 'user', content: prompt },
+        ],
+        temperature: 0.8,
+        max_tokens: 90,
+      })
+      return parseResponse(extractChatMessage(response), config.game, config.sideChannel)
+    }
+
+    const runMatch = async (config) => {
+      match = { score: { a: 0, b: 0 }, history: [] }
+      setScoreNames(config.players)
+      updateScoreboard()
+      renderHistory()
+
+      for (let roundNumber = 1; roundNumber <= config.rounds; roundNumber += 1) {
+        statusText.textContent = `Round ${roundNumber}: waiting for both models.`
+        roundLabel.textContent = `R${roundNumber}`
+        seatAMove.textContent = '...'
+        seatBMove.textContent = '...'
+        seatAMessage.textContent = 'Choosing a legal move.'
+        seatBMessage.textContent = 'Choosing a legal move.'
+
+        const [aTurn, bTurn] = await Promise.all([
+          callPlayer(config, 'a', roundNumber),
+          callPlayer(config, 'b', roundNumber),
+        ])
+
+        const scored = config.game.scoreRound(aTurn.move, bTurn.move, {
+          a: config.players.a.name,
+          b: config.players.b.name,
+        })
+
+        match.score.a += scored.a
+        match.score.b += scored.b
+
+        const round = {
+          round: roundNumber,
+          a: aTurn,
+          b: bTurn,
+          result: scored.result,
+          points: scored,
+          cumulative: { ...match.score },
+        }
+        match.history.push(round)
+
+        seatAMove.textContent = aTurn.move
+        seatBMove.textContent = bTurn.move
+        seatAMessage.textContent = aTurn.message || 'No table talk.'
+        seatBMessage.textContent = bTurn.message || 'No table talk.'
+        roundResult.textContent = scored.result
+        updateScoreboard()
+        renderHistory()
+      }
+
+      const winner = match.score.a === match.score.b
+        ? 'Final result: tie match.'
+        : match.score.a > match.score.b
+          ? `Final result: ${config.players.a.name} wins.`
+          : `Final result: ${config.players.b.name} wins.`
+      statusText.textContent = `${winner} Score ${match.score.a}-${match.score.b}.`
+    }
+
+    form.addEventListener('change', (event) => {
+      if (event.target.name === 'game') {
+        renderGuide()
+      }
+      if (event.target.name === 'playerAName' || event.target.name === 'playerBName') {
+        setScoreNames(getFormConfig().players)
+      }
+    })
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault()
+      if (getAuthState().status !== 'authorized') {
+        statusText.textContent = 'Connect OpenRouter before starting a match.'
+        return
+      }
+
+      const config = getFormConfig()
+      isRunning = true
+      updateAuthNote(getAuthState())
+      clearButton.disabled = true
+
+      try {
+        await runMatch(config)
+      } catch (error) {
+        statusText.textContent = error instanceof Error ? error.message : 'Unexpected match error.'
+      } finally {
+        isRunning = false
+        clearButton.disabled = false
+        updateAuthNote(getAuthState())
+      }
+    })
+
+    clearButton.addEventListener('click', () => {
+      if (!isRunning) {
+        resetBoard()
+      }
+    })
+
+    renderGuide()
+    resetBoard()
+    updateAuthNote(getAuthState())
+    onAuthChange(updateAuthNote)
+  </script>
+</body>
+</html>

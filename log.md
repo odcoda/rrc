@@ -1,3 +1,9 @@
+## 2026-06-20 add LLM game arena prototype
+built a model-vs-model game prototype and architecture report:
+- added Rock Paper Scissors and Prisoner's Dilemma with hard-coded move parsing and scoring
+- included optional table-talk messages that feed into later rounds
+- linked the prototype and framework report from the roster
+
 ## 2026-05-31 handle private browser auth storage
 hardened shared OpenRouter auth persistence:
 - verify browser storage before starting PKCE sign-in
